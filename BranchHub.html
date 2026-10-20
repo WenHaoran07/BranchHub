@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Branchline Performance Analyzers | J&T</title>
+  <style>
+    :root {
+      --jt-red: #E60012;
+      --jt-red-dark: #B8000E;
+      --jt-red-light: #FFEBEE;
+      --jt-red-soft: #FFCDD2;
+      --bg: #F5F5F5;
+      --card: #FFFFFF;
+      --text: #212121;
+      --muted: #757575;
+      --border: #E0E0E0;
+      --green: #2E7D32;
+      --green-bg: #E8F5E9;
+      --blue: #1565C0;
+      --blue-bg: #E3F2FD;
+      --amber: #FF8F00;
+      --amber-bg: #FFF8E1;
+      --teal: #00897B;
+      --teal-bg: #E0F2F1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    .logo-gif {
+      width: 132px;
+      height: 132px;
+      object-fit: contain;
+      border-radius: 10px;
+      padding: 4px;
+      display: block;
+      margin-left: 60px;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--jt-red) 0%, var(--jt-red-dark) 100%);
+      color: white;
+      padding: 14px 24px;
+      box-shadow: 0 2px 12px rgba(230,0,18,0.3);
+      position: relative;
+      z-index: 10;
+    }
+    .header-inner {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 300px;
+    }
+    .logo {
+      width: 42px; height: 42px;
+      background: white;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 1.1rem; color: var(--jt-red);
+    }
+    .header h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 20px 48px;
+      flex: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .intro {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .intro h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .intro p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ===== 3D Coverflow Carousel ===== */
+    .carousel-wrap {
+      width: 100%;
+      max-width: 900px;
+      perspective: 1200px;
+      margin: 12px auto 8px;
+      user-select: none;
+    }
+
+    .carousel-stage {
+      position: relative;
+      height: 420px;
+      transform-style: preserve-3d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .carousel-card {
+      position: absolute;
+      width: 300px;
+      max-width: 86vw;
+      background: var(--card);
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+      padding: 28px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition:
+        transform 0.55s cubic-bezier(0.25, 0.8, 0.25, 1),
+        opacity 0.45s ease,
+        box-shadow 0.45s ease,
+        border-color 0.3s ease,
+        filter 0.45s ease;
+      will-change: transform, opacity;
+      backface-visibility: hidden;
+    }
+
+    /* Positions set via JS classes */
+    .carousel-card.pos-front {
+      transform: translateX(0) translateZ(80px) rotateY(0deg) scale(1);
+      opacity: 1;
+      z-index: 5;
+      box-shadow: 0 16px 40px rgba(230,0,18,0.18);
+      border-color: var(--jt-red-soft);
+      filter: none;
+      pointer-events: auto;
+    }
+    .carousel-card.pos-left {
+      transform: translateX(-240px) translateZ(-40px) rotateY(32deg) scale(0.86);
+      opacity: 0.72;
+      z-index: 2;
+      filter: brightness(0.92);
+      pointer-events: auto;
+    }
+    .carousel-card.pos-right {
+      transform: translateX(240px) translateZ(-40px) rotateY(-32deg) scale(0.86);
+      opacity: 0.72;
+      z-index: 2;
+      filter: brightness(0.92);
+      pointer-events: auto;
+    }
+    .carousel-card.pos-back {
+      transform: translateX(0) translateZ(-160px) rotateY(0deg) scale(0.7);
+      opacity: 0.25;
+      z-index: 1;
+      filter: brightness(0.85);
+      pointer-events: none;
+    }
+
+    .carousel-card:hover.pos-front {
+      transform: translateX(0) translateZ(90px) rotateY(0deg) scale(1.03);
+      box-shadow: 0 20px 48px rgba(230,0,18,0.22);
+    }
+    .carousel-card:hover.pos-left {
+      transform: translateX(-230px) translateZ(-20px) rotateY(28deg) scale(0.9);
+      opacity: 0.88;
+    }
+    .carousel-card:hover.pos-right {
+      transform: translateX(230px) translateZ(-20px) rotateY(-28deg) scale(0.9);
+      opacity: 0.88;
+    }
+
+    .card-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      margin-bottom: 16px;
+      flex-shrink: 0;
+    }
+    .carousel-card.travel-time .card-icon {
+      background: var(--blue-bg);
+      color: var(--blue);
+    }
+    .carousel-card.app-usage .card-icon {
+      background: var(--teal-bg);
+      color: var(--teal);
+    }
+    .carousel-card.departure-rate .card-icon {
+      background: var(--amber-bg);
+      color: var(--amber);
+    }
+
+    .carousel-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .carousel-card p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      flex: 1;
+      margin-bottom: 16px;
+      line-height: 1.55;
+    }
+
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: #F5F5F5;
+      color: var(--muted);
+    }
+    .badge.target {
+      background: var(--green-bg);
+      color: var(--green);
+    }
+
+    .card-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--jt-red);
+      color: white;
+      font-weight: 600;
+      font-size: 0.92rem;
+      padding: 11px 18px;
+      border-radius: 10px;
+      border: none;
+      transition: background 0.15s ease, transform 0.15s ease;
+      width: 100%;
+    }
+    .carousel-card.travel-time .card-btn { background: var(--blue); }
+    .carousel-card.app-usage .card-btn { background: var(--teal); }
+    .carousel-card.departure-rate .card-btn { background: var(--amber); }
+    .carousel-card.pos-front:hover .card-btn {
+      filter: brightness(0.92);
+    }
+
+    /* Controls */
+    .carousel-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+    .nav-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 1.35rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s, color 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .nav-btn:hover {
+      background: var(--jt-red);
+      border-color: var(--jt-red);
+      color: #fff;
+      transform: scale(1.08);
+    }
+    .nav-btn:active {
+      transform: scale(0.96);
+    }
+
+    .dots {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #D0D0D0;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: background 0.25s, transform 0.25s;
+    }
+    .dot.active {
+      background: var(--jt-red);
+      transform: scale(1.25);
+    }
+    .dot:hover:not(.active) {
+      background: #A0A0A0;
+    }
+
+    .hint {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .hint kbd {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: #eee;
+      border: 1px solid #ddd;
+      font-size: 0.78rem;
+      font-family: inherit;
+    }
+
+    footer {
+      text-align: center;
+      padding: 18px 16px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      background: var(--card);
+    }
+
+    @media (max-width: 700px) {
+      .header h1 { font-size: 1.25rem; }
+      .header-left { gap: 16px; }
+      .logo-gif { margin-left: 0; width: 64px; height: 64px; }
+      .carousel-stage { height: 400px; }
+      .carousel-card { width: 270px; padding: 22px 18px 18px; }
+      .carousel-card.pos-left {
+        transform: translateX(-130px) translateZ(-50px) rotateY(28deg) scale(0.8);
+      }
+      .carousel-card.pos-right {
+        transform: translateX(130px) translateZ(-50px) rotateY(-28deg) scale(0.8);
+      }
+      .carousel-card.pos-front {
+        transform: translateX(0) translateZ(40px) rotateY(0deg) scale(1);
+      }
+      .carousel-card:hover.pos-front {
+        transform: translateX(0) translateZ(50px) rotateY(0deg) scale(1.02);
+      }
+      .carousel-card:hover.pos-left {
+        transform: translateX(-120px) translateZ(-30px) rotateY(24deg) scale(0.84);
+      }
+      .carousel-card:hover.pos-right {
+        transform: translateX(120px) translateZ(-30px) rotateY(-24deg) scale(0.84);
+      }
+    }
+
+    /* ===== Login gate ===== */
+    #loginGate {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: linear-gradient(145deg, #B8000E 0%, #E60012 45%, #7f0a12 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #loginGate.hidden { display: none; }
+    .login-card {
+      background: #fff;
+      width: 100%;
+      max-width: 380px;
+      border-radius: 16px;
+      padding: 32px 28px 28px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.28);
+    }
+    .login-card .login-logo {
+      width: 52px; height: 52px;
+      background: var(--jt-red);
+      color: #fff;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 1.15rem;
+      margin: 0 auto 14px;
+    }
+    .login-card h2 {
+      text-align: center;
+      font-size: 1.25rem;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+    .login-card .login-sub {
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+    .login-card label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .login-card input {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      margin-bottom: 14px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .login-card input:focus {
+      border-color: var(--jt-red);
+      box-shadow: 0 0 0 3px rgba(230,0,18,0.12);
+    }
+    .login-card button {
+      width: 100%;
+      padding: 12px;
+      background: var(--jt-red);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background 0.15s;
+    }
+    .login-card button:hover { background: var(--jt-red-dark); }
+    .login-error {
+      display: none;
+      background: #FFEBEE;
+      color: #C62828;
+      font-size: 0.85rem;
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .login-error.show { display: block; }
+    body.locked > :not(#loginGate) {
+      visibility: hidden;
+    }
+  </style>
+</head>
+<body class="locked">
+
+  <!-- Password gate -->
+  <div id="loginGate">
+    <div class="login-card">
+     <div> <img src="JNTLogo.png" alt="J&T Express Logo" class="Password"
+  style="width:120px;height:auto;object-fit:contain;display:block;margin:0 auto 16px;border-radius:10px;">
+    </div>
+      <h2>Branchline Analyzers</h2>
+      <p class="login-sub">Enter password to continue</p>
+      <div id="loginError" class="login-error">Incorrect password. Please try again.</div>
+      <label for="loginPass">Password</label>
+      <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
+      <button type="button" id="loginBtn">Unlock</button>
+    </div>
+  </div>
+
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <img src="jt-logo.gif" alt="J&T Express Logo" class="logo-gif"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="logo logo-fallback" style="display:none;">J&T</div>
+        <h1>Branchline Performance Analyzers</h1>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="intro">
+      <h2>Select Analyzer</h2>
+    </div>
+
+    <div class="carousel-wrap">
+      <div class="carousel-stage" id="carouselStage">
+
+<a class="carousel-card travel-time" href="BranchlineTravelTimeAnalyzer.html" data-index="0" title="Open Branchline Travel Time">
+          <div class="card-icon" style="text-align: center; margin-left: auto; margin-right: auto; display: block;">🛣️</div>
+          <h3 style="text-align: center;">Branchline Travel Time</h3>
+          <p>
+          </p>
+          <div class="card-meta">
+            <span class="badge target">Target 98%</span>
+            <span class="badge">Delay Reason</span>
+            <span class="badge">SP Delay</span>
+          </div>
+          <div class="card-btn">Open Travel Time →</div>
+        </a>
+
+        <a class="carousel-card app-usage" href="BranchlineAppUsageAnalyzer.html" data-index="1" title="Open Branchline App Usage">
+          <div class="card-icon" style="text-align: center; margin-left: auto; margin-right: auto; display: block;">📱</div>
+          <h3 style="text-align: center;">Branchline App Usage</h3>
+          <p>
+          </p>
+          <div class="card-meta">
+            <span class="badge target">Target 99%</span>
+            <span class="badge">By SP</span>
+            <span class="badge">Detail filter</span>
+          </div>
+          <div class="card-btn">Open App Usage →</div>
+        </a>
+
+        <a class="carousel-card departure-rate" href="BranchlineDepartureRateAnalyzer.html" data-index="2" title="Open Branchline Departure Rate">
+          <div class="card-icon" style="text-align: center; margin-left: auto; margin-right: auto; display: block;">⏱️</div>
+          <h3 style="text-align: center;">Branchline Departure Rate</h3>
+          <p>
+          </p>
+          <div class="card-meta">
+            <span class="badge target">Target 97%</span>
+            <span class="badge">SP Late Routes</span>
+            <span class="badge">Late detail</span>
+          </div>
+          <div class="card-btn">Open Departure Rate →</div>
+        </a>
+
+      </div>
+    </div>
+
+    <div class="carousel-controls">
+      <button type="button" class="nav-btn" id="btnPrev" aria-label="Previous analyzer">‹</button>
+      <div class="dots" id="dots">
+        <button type="button" class="dot active" data-go="0" aria-label="Travel Time"></button>
+        <button type="button" class="dot" data-go="1" aria-label="App Usage"></button>
+        <button type="button" class="dot" data-go="2" aria-label="Departure Rate"></button>
+      </div>
+      <button type="button" class="nav-btn" id="btnNext" aria-label="Next analyzer">›</button>
+    </div>
+  </main>
+
+  <footer>
+    ©2026 - Vince Adesa · J&T Branchline Analyzer Hub
+  </footer>
+
+  <script>
+  (function () {
+    /* ===== Login ===== */
+    const PASS_HASH = "3d8b706ada838fa7d3a8f80e95133e6021e2a74a248b71de6a6fcc18aa6da573";
+    const STORAGE_KEY = "branch_hub_unlocked";
+
+    const gate = document.getElementById("loginGate");
+    const input = document.getElementById("loginPass");
+    const btn = document.getElementById("loginBtn");
+    const err = document.getElementById("loginError");
+
+    async function sha256(text) {
+      const data = new TextEncoder().encode(text);
+      const buf = await crypto.subtle.digest("SHA-256", data);
+      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    function unlock() {
+      document.body.classList.remove("locked");
+      if (gate) gate.classList.add("hidden");
+      try { sessionStorage.setItem(STORAGE_KEY, "1"); } catch (e) {}
+      try { if (input) input.blur(); } catch (e) {}
+    }
+
+    async function tryLogin() {
+      err.classList.remove("show");
+      const value = (input.value || "").trim();
+      if (!value) {
+        err.textContent = "Please enter the password.";
+        err.classList.add("show");
+        return;
+      }
+      const hash = await sha256(value);
+      if (hash === PASS_HASH) unlock();
+      else {
+        err.textContent = "Incorrect password. Please try again.";
+        err.classList.add("show");
+        input.select();
+      }
+    }
+
+    try {
+      if (sessionStorage.getItem(STORAGE_KEY) === "1") unlock();
+    } catch (e) {}
+
+    btn.addEventListener("click", tryLogin);
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        e.stopPropagation();
+        tryLogin();
+      }
+    });
+
+    /* ===== 3D Coverflow Carousel ===== */
+    const cards = Array.from(document.querySelectorAll(".carousel-card"));
+    const dots = Array.from(document.querySelectorAll(".dot"));
+    const n = cards.length;
+    let active = 0;
+    let animating = false;
+
+    function posClass(offset) {
+      // offset relative to active: 0 = front, -1 = left, +1 = right, else back
+      if (offset === 0) return "pos-front";
+      if (offset === -1 || offset === n - 1) return "pos-left";
+      if (offset === 1 || offset === 1 - n) return "pos-right";
+      return "pos-back";
+    }
+
+    function render() {
+      cards.forEach((card, i) => {
+        let offset = i - active;
+        // normalize to shortest direction for 3 cards
+        if (offset > n / 2) offset -= n;
+        if (offset < -n / 2) offset += n;
+        card.classList.remove("pos-front", "pos-left", "pos-right", "pos-back");
+        card.classList.add(posClass(offset));
+      });
+      dots.forEach((d, i) => d.classList.toggle("active", i === active));
+    }
+
+    function go(index) {
+      if (animating) return;
+      active = ((index % n) + n) % n;
+      animating = true;
+      render();
+      setTimeout(() => { animating = false; }, 500);
+    }
+
+    function next() { go(active + 1); }
+    function prev() { go(active - 1); }
+
+    document.getElementById("btnNext").addEventListener("click", next);
+    document.getElementById("btnPrev").addEventListener("click", prev);
+
+    dots.forEach(d => {
+      d.addEventListener("click", () => go(+d.dataset.go));
+    });
+
+    // Click side cards → bring to front (don't navigate yet)
+    cards.forEach((card, i) => {
+      card.addEventListener("click", function (e) {
+        if (i !== active) {
+          e.preventDefault();
+          go(i);
+        }
+        // if front, let the <a href> navigate normally
+      });
+    });
+
+    // Keyboard
+    document.addEventListener("keydown", function (e) {
+      if (document.body.classList.contains("locked")) return;
+      if (gate && !gate.classList.contains("hidden")) return;
+      const tag = (e.target && e.target.tagName) || "";
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "BUTTON" || tag === "SELECT") return;
+      if (e.key === "ArrowRight") { e.preventDefault(); next(); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
+      else if (e.key === "Enter") {
+        e.preventDefault();
+        const front = cards[active];
+        if (front && front.href) window.location.href = front.href;
+      }
+    });
+
+    // Touch / swipe
+    let touchX = null;
+    const stage = document.getElementById("carouselStage");
+    stage.addEventListener("touchstart", (e) => {
+      touchX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    stage.addEventListener("touchend", (e) => {
+      if (touchX == null) return;
+      const dx = e.changedTouches[0].screenX - touchX;
+      touchX = null;
+      if (Math.abs(dx) < 40) return;
+      if (dx < 0) next();
+      else prev();
+    }, { passive: true });
+
+    render();
+  })();
+  </script>
+</body>
+</html>

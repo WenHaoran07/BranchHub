@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLU Branchline Travel Time Analyzer | J&T</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="blt.css">
+</head>
+<body>
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <img src="Packing.gif" alt="J&T Express Logo" class="logo-gif"
+             onerror="this.src='Rider.gif'; this.onerror=null;">
+        <div>
+          <h1>Branchline Travel Time Analyzer</h1>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <a href="BranchHub.html" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.2);color:#fff;text-decoration:none;font-weight:600;font-size:0.88rem;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.35);white-space:nowrap;">← Back to Hub</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="upload-box" id="dropZone">
+      <img src="upload-file.gif" alt="Upload File" class="upload-gif"
+           onerror="this.outerHTML='<div class=&quot;upload-icon&quot;>📂</div>';">
+      <p><strong>Click to upload</strong> or drag & drop Excel file</p>
+      <p>Supports .xlsx with DATA sheet (SLU Branchline Travel Time)</p>
+      <input type="file" id="fileInput" accept=".xlsx,.xls">
+    </div>
+
+    <div id="loading" class="loading hidden">
+      <img src="jnt-loading.gif" alt="Loading..." class="loading-gif"
+           onerror="this.style.display='none';">
+      <div>Analyzing branchline travel time data, please wait...</div>
+    </div>
+    <div id="loadingCompare" class="loading hidden">
+      <img src="loading.gif" alt="Comparing..." class="loading-gif"
+           onerror="this.style.display='none';">
+      <div>Comparing date metrics, please wait...</div>
+    </div>
+
+    <div id="results" class="hidden">
+      <!-- Comparison -->
+      <div class="card">
+        <h2><span class="icon">📊</span> SLU Branchline Comparison</h2>
+        <div class="date-selectors" id="dateSelectors">
+          <div>
+            <label>Previous / Baseline</label>
+            <select id="selectPrev"></select>
+          </div>
+          <div>
+            <label>Latest / Focus</label>
+            <select id="selectLatest"></select>
+          </div>
+          <button id="btnCompare">Compare</button>
+        </div>
+        <div class="date-info">
+          Comparing <span class="badge" id="datePrev"></span> vs <span class="badge" id="dateLatest"></span>
+          <span class="target-badge" id="targetBadgeText">Target 98%</span>
+        </div>
+        <div class="metrics" id="metricsOverall"></div>
+        <div class="summary-box" id="summaryText"></div>
+      </div>
+
+      <!-- Late panels -->
+      <div class="card">
+        <h2><span class="icon">⚠</span> Late DC &amp; Service Partners</h2>
+        <p class="section-note">(Current Day) based on <strong>DC INTENDED</strong> - entities with at least one late trip</p>
+        <div id="lateDcPanel"></div>
+        <div id="lateSpPanel" style="margin-top:16px;"></div>
+        <div id="noLatePanel" class="hidden"></div>
+      </div>
+
+      <!-- Bulk / Collection -->
+      <div class="split-row">
+        <div class="card">
+          <h2><span class="icon">📦</span> Bulk Cargo</h2>
+          <div class="metrics" id="metricsBulk"></div>
+        </div>
+        <div class="card">
+          <h2><span class="icon">📥</span> Collection</h2>
+          <div class="metrics" id="metricsCollection"></div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-row">
+        <div class="card">
+          <h2><span class="icon">📍</span> Late by DC</h2>
+          <p class="section-note">Grouped by DC INTENDED</p>
+          <div class="chart-wrap"><canvas id="chartDC"></canvas></div>
+        </div>
+        <div class="card">
+          <h2><span class="icon">🤝</span> Late by Service Partner</h2>
+          <p class="section-note">SP / PH with late trips</p>
+          <div class="chart-wrap"><canvas id="chartSP"></canvas></div>
+        </div>
+      </div>
+      <div class="charts-row">
+        <div class="card">
+          <h2><span class="icon">🗺️</span> Top Late Routes</h2>
+          <p class="section-note">Routes with the most late trips</p>
+          <div class="chart-wrap"><canvas id="chartRoutes"></canvas></div>
+        </div>
+        <div class="card">
+          <h2><span class="icon">📉</span> Daily Achievement Trend</h2>
+          <p class="section-note">Branchline on-time rate over recent days</p>
+          <div class="chart-wrap history-chart-wrap"><canvas id="chartHistory"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Tables with tabs -->
+      <div class="card">
+        <h2><span class="icon">📋</span> Detail Tables</h2>
+        <div class="tabs">
+          <div class="tab active" data-tab="tabDC">Daily Comparison per DC Intended</div>
+          <div class="tab" data-tab="tabSP">SP Performance</div>
+          <div class="tab" data-tab="tabSpLateRoutes">SP Late Routes</div>
+          <div class="tab" data-tab="tabRoutes">Routes</div>
+          <div class="tab" data-tab="tabLateDetail">Late Trip Detail</div>
+          <div class="tab" data-tab="tabHistory">Daily History</div>
+          <div class="tab" data-tab="tabDelayReason">Delay Reason</div>
+          <div class="tab" data-tab="tabSpDelay">SP Delay Encountered</div>
+        </div>
+
+        <div id="tabDC" class="tab-panel active">
+          <p class="section-note">DC Intended performance (code → name) · current day vs previous</p>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>DC Name</th>
+                  <th>Total</th>
+                  <th>On Time</th>
+                  <th>Late</th>
+                  <th>Rate</th>
+                  <th>Prev Rate</th>
+                  <th>Rate Diff</th>
+                </tr>
+              </thead>
+              <tbody id="dcBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tabSP" class="tab-panel">
+          <p class="section-note">Service Partner (PH/SP) performance · current day vs previous</p>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Service Partner</th>
+                  <th>Total</th>
+                  <th>On Time</th>
+                  <th>Late</th>
+                  <th>Rate</th>
+                  <th>Prev Rate</th>
+                  <th>Rate Diff</th>
+                </tr>
+              </thead>
+              <tbody id="spBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tabSpLateRoutes" class="tab-panel">
+          <p class="section-note">Late routes grouped by Service Partner (focus day)</p>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Service Partner</th>
+                  <th>Route</th>
+                  <th>Late</th>
+                  <th>DC Intended</th>
+                </tr>
+              </thead>
+              <tbody id="spLateRoutesBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tabRoutes" class="tab-panel">
+          <p class="section-note">All routes · current day vs previous</p>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Route</th>
+                  <th>Total</th>
+                  <th>On Time</th>
+                  <th>Late</th>
+                  <th>Rate</th>
+                  <th>Prev Rate</th>
+                  <th>Rate Diff</th>
+                </tr>
+              </thead>
+              <tbody id="routesBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tabLateDetail" class="tab-panel">
+          <p class="section-note">Times as hours &amp; minutes (e.g. 2h 15m). If Actual Truck Dispatch Time is blank → shows <strong>Not on time</strong>.</p>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Shipment / Code</th>
+                  <th>Route</th>
+                  <th>Dep DC</th>
+                  <th>SP</th>
+                  <th>Line Type</th>
+                  <th>Plate</th>
+                  <th>Actual TT</th>
+                  <th>Plan TT</th>
+                  <th>Overrun</th>
+                  <th>Late Time</th>
+                </tr>
+              </thead>
+              <tbody id="lateBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tabHistory" class="tab-panel">
+          <p class="section-note">Daily SLU Branchline achievement rate (most recent first)</p>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Total</th>
+                  <th>On Time</th>
+                  <th>Late</th>
+                  <th>Rate</th>
+                </tr>
+              </thead>
+              <tbody id="historyBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tabDelayReason" class="tab-panel">
+          <div class="pe-toolbar">
+            <div id="peDateFilterWrap">
+              <label class="pe-label">Report date</label>
+              <select id="selectDelayDate"></select>
+            </div>
+            <div id="peWeekFilterWrap" style="display:none;">
+              <label class="pe-label">Report week</label>
+              <select id="selectDelayWeek"></select>
+            </div>
+            <div class="pe-subtabs">
+              <button type="button" class="pe-subtab active" data-pe-view="daily">Daily Problem Encountered</button>
+              <button type="button" class="pe-subtab" data-pe-view="weekly">Weekly Problem Encountered</button>
+              <button type="button" class="pe-subtab" data-pe-view="table">Delay Reason Table</button>
+            </div>
+          </div>
+          <div id="delayReasonPanel">
+            <div id="peDailyView"></div>
+            <div id="peWeeklyView" class="hidden"></div>
+            <div id="peTableView" class="hidden"></div>
+          </div>
+          <p class="section-note" style="margin-top:12px;">
+            Sources: <strong>NO CLOCK-IN</strong>, <strong>NO CLOCK-OUT</strong>, <strong>IR DEPARTURE</strong>, <strong>IR TRAVEL TIME</strong> sheets.
+            Problem = SPECIFIC; detail from DETAILED / REMARKS / IR file name.
+          </p>
+        </div>
+
+        <div id="tabSpDelay" class="tab-panel">
+          <p class="section-note">Top delay contributors by <strong>Service Partner</p>
+          <div class="sp-delay-toolbar">
+            <div>
+              <label class="pe-label" for="spDelayModeFilter">Filter by</label>
+              <select id="spDelayModeFilter">
+                <option value="date">Date</option>
+                <option value="week">Week</option>
+              </select>
+            </div>
+            <div id="spDelayDateWrap">
+              <label class="pe-label" for="spDelayDateFilter">Date</label>
+              <select id="spDelayDateFilter">
+                <option value="ALL">Overall (All dates)</option>
+              </select>
+            </div>
+            <div id="spDelayWeekWrap" style="display:none;">
+              <label class="pe-label" for="spDelayWeekFilter">Week</label>
+              <select id="spDelayWeekFilter"></select>
+            </div>
+            <div>
+              <label class="pe-label" for="spDelaySortFilter">Sort by</label>
+              <select id="spDelaySortFilter">
+                <option value="totalDelay">Total delay</option>
+                <option value="lateTrips">Late trips</option>
+                <option value="avgDelay">Avg delay</option>
+              </select>
+            </div>
+            <div class="sp-delay-sp-wrap">
+              <label class="pe-label">SP Name</label>
+              <div class="sp-ms-dropdown" id="spDelayMs">
+                <button type="button" class="sp-ms-toggle" id="spDelayMsToggle" aria-expanded="false">
+                  <span id="spDelayMsLabel">All SPs</span>
+                  <span class="sp-ms-caret">▾</span>
+                </button>
+                <div class="sp-ms-panel hidden" id="spDelayMsPanel">
+                  <div class="sp-ms-actions">
+                    <button type="button" id="spDelaySpAll" class="sp-delay-mini-btn">Select all</button>
+                    <button type="button" id="spDelaySpClear" class="sp-delay-mini-btn">Clear</button>
+                  </div>
+                  <div class="sp-ms-list" id="spDelaySpList"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="section-note" id="spDelayNote"></p>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>SP Name</th>
+                  <th>Route (delayed)</th>
+                  <th>DC Intended</th>
+                  <th>Late trips</th>
+                  <th>Total delay</th>
+                  <th>Avg delay</th>
+                  <th>Problem</th>
+                </tr>
+              </thead>
+              <tbody id="spDelayBody"></tbody>
+            </table>
+          </div>
+          <div id="spDelayDetail"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="bltUtils.js"></script>
+  <script src="bltFileProcessor.js"></script>
+  <script src="bltDataAnalyzer.js"></script>
+  <script src="bltChartManager.js"></script>
+  <script src="bltUIManager.js"></script>
+  <script src="bltDelayReason.js"></script>
+  <script src="bltSpDelay.js"></script>
+  <script src="bltApp.js"></script>
+</body>
+</html>
