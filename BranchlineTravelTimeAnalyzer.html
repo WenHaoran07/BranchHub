@@ -92,7 +92,7 @@
       <div class="charts-row">
         <div class="card">
           <h2><span class="icon">📍</span> Late by DC</h2>
-          <p class="section-note">Grouped by DC INTENDED</p>
+          <p class="section-note">Grouped by DC</p>
           <div class="chart-wrap"><canvas id="chartDC"></canvas></div>
         </div>
         <div class="card">
@@ -118,7 +118,7 @@
       <div class="card">
         <h2><span class="icon">📋</span> Detail Tables</h2>
         <div class="tabs">
-          <div class="tab active" data-tab="tabDC">Daily Comparison per DC Intended</div>
+          <div class="tab active" data-tab="tabDC">Daily Comparison per DC</div>
           <div class="tab" data-tab="tabSP">SP Performance</div>
           <div class="tab" data-tab="tabSpLateRoutes">SP Late Routes</div>
           <div class="tab" data-tab="tabRoutes">Routes</div>
@@ -129,7 +129,7 @@
         </div>
 
         <div id="tabDC" class="tab-panel active">
-          <p class="section-note">DC Intended performance (code → name) · current day vs previous</p>
+          <p class="section-note">DC performance · current day vs previous</p>
           <div class="table-scroll">
             <table>
               <thead>
@@ -206,7 +206,7 @@
         </div>
 
         <div id="tabLateDetail" class="tab-panel">
-          <p class="section-note">Times as hours &amp; minutes (e.g. 2h 15m). If Actual Truck Dispatch Time is blank → shows <strong>Not on time</strong>.</p>
+          <p class="section-note">If Actual Truck Dispatch Time is blank → shows <strong>Not on time</strong>.</p>
           <div class="table-scroll">
             <table>
               <thead>
@@ -229,7 +229,7 @@
         </div>
 
         <div id="tabHistory" class="tab-panel">
-          <p class="section-note">Daily SLU Branchline achievement rate (most recent first)</p>
+          <p class="section-note">Daily SLU Branchline achievement rate</p>
           <div class="table-scroll">
             <table>
               <thead>
@@ -268,8 +268,6 @@
             <div id="peTableView" class="hidden"></div>
           </div>
           <p class="section-note" style="margin-top:12px;">
-            Sources: <strong>NO CLOCK-IN</strong>, <strong>NO CLOCK-OUT</strong>, <strong>IR DEPARTURE</strong>, <strong>IR TRAVEL TIME</strong> sheets.
-            Problem = SPECIFIC; detail from DETAILED / REMARKS / IR file name.
           </p>
         </div>
 
