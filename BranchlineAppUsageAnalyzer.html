@@ -45,6 +45,18 @@
     </div>
 
     <div id="results" class="hidden">
+      <div class="bau-main-tabs" role="tablist" aria-label="App Usage views">
+        <button type="button" class="bau-main-tab active" id="tabBauDay" role="tab" aria-selected="true">
+          <span class="bau-tab-icon">📅</span>
+          <span class="bau-tab-label">App Usage Comparison</span>
+        </button>
+        <button type="button" class="bau-main-tab" id="tabBauReport" role="tab" aria-selected="false">
+          <span class="bau-tab-icon">📊</span>
+          <span class="bau-tab-label">App Usage Report</span>
+        </button>
+      </div>
+
+      <div id="bauDayPanel">
       <!-- Comparison -->
       <div class="card">
         <h2><span class="icon">📱</span> SLU Branchline App Usage Comparison</h2>
@@ -252,7 +264,31 @@
             </table>
           </div>
         </div>
+
       </div>
+      </div><!-- /bauDayPanel -->
+
+      <div id="bauReportPanel" class="hidden">
+        <div class="card">
+          <h2><span class="icon">📊</span> Service Partners App Used Rates Report</h2>
+          <p class="section-note">
+          </p>
+          <div class="bau-report-toolbar">
+            <div>
+              <label class="pe-label" for="bauReportWeekFilter">Week filter</label>
+              <select id="bauReportWeekFilter"></select>
+            </div>
+            <div class="bau-report-toolbar-hint" id="bauReportWeekHint"></div>
+          </div>
+          <p class="section-note" id="spRateReportNote"></p>
+          <div class="table-wrap sp-rate-table-wrap">
+            <table class="sp-rate-table" id="tableSpRateReport">
+              <thead id="theadSpRateReport"></thead>
+              <tbody id="tbodySpRateReport"></tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- /bauReportPanel -->
     </div>
   </div>
 
@@ -261,6 +297,8 @@
   <script src="bauDataAnalyzer.js"></script>
   <script src="bauChartManager.js"></script>
   <script src="bauUIManager.js"></script>
+  <script src="bauDetailFilter.js"></script>
+  <script src="bauSpRateReport.js"></script>
   <script src="bauApp.js"></script>
 </body>
 </html>
