@@ -888,3 +888,193 @@ tr.top-culprit td:first-child::before {
   font-size: 0.9rem;
   padding: 8px 0;
 }
+
+/* ==========================================================================
+   SP App Used Rates report table
+   ========================================================================== */
+.sp-rate-table-wrap {
+  overflow: auto;
+  max-height: 70vh;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+}
+.sp-rate-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: max-content;
+  min-width: 100%;
+  font-size: 0.78rem;
+}
+.sp-rate-table th,
+.sp-rate-table td {
+  border-right: 1px solid #E0E0E0;
+  border-bottom: 1px solid #E0E0E0;
+  padding: 6px 8px;
+  text-align: center;
+  white-space: nowrap;
+}
+.sp-rate-table th:first-child,
+.sp-rate-table td:first-child {
+  border-left: 1px solid #E0E0E0;
+}
+.sp-rate-table thead tr:first-child th {
+  border-top: 1px solid #E0E0E0;
+}
+/* Two-row sticky header: group row + subhead both stay visible while scrolling */
+.sp-rate-table thead tr.sp-rate-group-row th {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  box-shadow: 0 1px 0 #E0E0E0;
+}
+.sp-rate-table thead tr.sp-rate-subhead th {
+  position: sticky;
+  top: 34px; /* height of group header row */
+  z-index: 3;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.08);
+}
+/* rowspan cells (SP / DC / Daily Gap) span both header rows — pin at top */
+.sp-rate-table thead th.sp-th-sp,
+.sp-rate-table thead th.sp-th-dc,
+.sp-rate-table thead th.sp-th-gap {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.sp-rate-table th {
+  background: #37474F;
+  color: #fff;
+  font-weight: 600;
+}
+.sp-rate-table .sp-th-group-daily { background: #F9A825; color: #212121; }
+.sp-rate-table .sp-th-group-week { background: #FBC02D; color: #212121; }
+.sp-rate-table .sp-th-group-month { background: #C62828; color: #fff; }
+.sp-rate-table .sp-th-sp,
+.sp-rate-table .sp-th-dc {
+  background: #B71C1C;
+  color: #fff;
+  text-align: left;
+}
+.sp-rate-table .sp-th-gap { background: #FFF8E1; color: #212121; }
+.sp-rate-table .sp-th-week { background: #FFF59D; color: #212121; }
+.sp-rate-table .sp-th-month { background: #EF9A9A; color: #212121; }
+.sp-rate-table .sp-th-daily { background: #FFE082; color: #212121; }
+.sp-rate-table td.sp-name {
+  text-align: left;
+  font-weight: 600;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sp-rate-table .sp-rate-good { color: #2E7D32; font-weight: 600; }
+.sp-rate-table .sp-rate-warn { color: #EF6C00; font-weight: 600; }
+.sp-rate-table .sp-rate-bad { color: #C62828; font-weight: 700; }
+.sp-rate-table tr.sp-row-neg-weekly {
+  background: #FFEBEE !important;
+}
+.sp-rate-table tr.sp-row-neg-weekly td {
+  border-color: #FFCDD2;
+}
+.sp-rate-table tr.sp-row-neg-weekly td.sp-name {
+  border-left: 4px solid #E60012;
+}
+.sp-rate-table .sp-weekly-diff-neg {
+  background: #FFCDD2;
+  font-weight: 700;
+}
+.sp-rate-table tbody tr:hover {
+  background: #FFF3E0;
+}
+.sp-rate-table tbody tr.sp-row-neg-weekly:hover {
+  background: #FFCDD2 !important;
+}
+
+/* ==========================================================================
+   Main tabs — segmented control (App Usage Comparison | Report)
+   ========================================================================== */
+.bau-main-tabs {
+  display: inline-flex;
+  gap: 0;
+  margin-bottom: 18px;
+  padding: 4px;
+  background: #F5F5F5;
+  border: 1px solid #E0E0E0;
+  border-radius: 12px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
+}
+.bau-main-tab {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: #616161;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 10px 18px;
+  border-radius: 9px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+.bau-main-tab .bau-tab-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+.bau-main-tab:hover {
+  color: #212121;
+  background: rgba(255,255,255,0.7);
+}
+.bau-main-tab.active {
+  background: #fff;
+  color: #E60012;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12), 0 0 0 1px rgba(230,0,18,0.15);
+  font-weight: 700;
+}
+.bau-main-tab.active .bau-tab-label {
+  color: #E60012;
+}
+
+/* Report week filter toolbar */
+.bau-report-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px 24px;
+  margin: 12px 0 8px;
+  padding: 12px 14px;
+  background: #FAFAFA;
+  border: 1px solid #EEEEEE;
+  border-radius: 10px;
+}
+.bau-report-toolbar select {
+  min-width: 320px;
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  background: #fff;
+}
+.bau-report-toolbar-hint {
+  font-size: 0.85rem;
+  color: #757575;
+  padding-bottom: 6px;
+}
+@media (max-width: 640px) {
+  .bau-main-tabs {
+    display: flex;
+    width: 100%;
+  }
+  .bau-main-tab {
+    flex: 1;
+    justify-content: center;
+    padding: 10px 12px;
+    font-size: 0.82rem;
+  }
+  .bau-report-toolbar select {
+    min-width: 0;
+    width: 100%;
+  }
+}
