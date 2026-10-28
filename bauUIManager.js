@@ -48,8 +48,10 @@ const BauUIManager = (() => {
     const prevLbl = datePrevLabel || datePrev;
     const latestLbl = dateLatestLabel || dateLatest;
 
-    document.getElementById('datePrev').textContent = prevLbl;
-    document.getElementById('dateLatest').textContent = latestLbl;
+    const elPrev = document.getElementById('datePrev');
+    const elLatest = document.getElementById('dateLatest');
+    if (elPrev) elPrev.textContent = prevLbl;
+    if (elLatest) elLatest.textContent = latestLbl;
 
     const targetBadge = document.getElementById('targetBadgeText');
     if (targetBadge) targetBadge.textContent = 'Target ' + targetPct + '%';
@@ -57,15 +59,17 @@ const BauUIManager = (() => {
     const rateDown = rateDiff != null && rateDiff < -0.005;
     const rateUp = rateDiff != null && rateDiff > 0.005;
 
-    // Overall metrics
-    document.getElementById('metricsOverall').innerHTML =
-      '<div class="metric ' + (rateDown ? 'highlight-down' : rateUp ? 'highlight-up' : '') + '"><div class="label">App Usage Rate</div><div class="value">' + fmtPct(overall.rate) + '</div><div class="diff ' + deltaClass(rateDiff) + '">' + fmtPp(rateDiff) + ' vs prev</div></div>' +
-      '<div class="metric"><div class="label">Total Trips</div><div class="value">' + overall.total + '</div><div class="diff neutral">' + overallPrev.total + ' prev</div></div>' +
-      '<div class="metric"><div class="label">Compliant (Both YES)</div><div class="value pos">' + overall.yes + '</div></div>' +
-      '<div class="metric ' + (overall.no > 0 ? 'highlight-down' : '') + '"><div class="label">Non-Compliant</div><div class="value ' + (overall.no ? 'neg' : '') + '">' + overall.no + '</div><div class="diff neutral">' + overallPrev.no + ' prev</div></div>' +
-      '<div class="metric"><div class="label">Clock-In Rate</div><div class="value">' + fmtPct(overall.cinRate) + '</div><div class="diff neutral">' + overall.cinNo + ' NO</div></div>' +
-      '<div class="metric"><div class="label">Clock-Out Rate</div><div class="value">' + fmtPct(overall.coutRate) + '</div><div class="diff neutral">' + overall.coutNo + ' NO</div></div>' +
-      '<div class="metric ' + rateClass(overall.rate, target) + '"><div class="label">vs Target ' + targetPct + '%</div><div class="value">' + (overall.rate != null ? (overall.rate >= target ? '✓' : '✗') : '—') + '</div></div>';
+    const metricsOverall = document.getElementById('metricsOverall');
+    if (metricsOverall) {
+      metricsOverall.innerHTML =
+        '<div class="metric ' + (rateDown ? 'highlight-down' : rateUp ? 'highlight-up' : '') + '"><div class="label">App Usage Rate</div><div class="value">' + fmtPct(overall.rate) + '</div><div class="diff ' + deltaClass(rateDiff) + '">' + fmtPp(rateDiff) + ' vs prev</div></div>' +
+        '<div class="metric"><div class="label">Total Trips</div><div class="value">' + overall.total + '</div><div class="diff neutral">' + overallPrev.total + ' prev</div></div>' +
+        '<div class="metric"><div class="label">Compliant (Both YES)</div><div class="value pos">' + overall.yes + '</div></div>' +
+        '<div class="metric ' + (overall.no > 0 ? 'highlight-down' : '') + '"><div class="label">Non-Compliant</div><div class="value ' + (overall.no ? 'neg' : '') + '">' + overall.no + '</div><div class="diff neutral">' + overallPrev.no + ' prev</div></div>' +
+        '<div class="metric"><div class="label">Clock-In Rate</div><div class="value">' + fmtPct(overall.cinRate) + '</div><div class="diff neutral">' + overall.cinNo + ' NO</div></div>' +
+        '<div class="metric"><div class="label">Clock-Out Rate</div><div class="value">' + fmtPct(overall.coutRate) + '</div><div class="diff neutral">' + overall.coutNo + ' NO</div></div>' +
+        '<div class="metric ' + rateClass(overall.rate, target) + '"><div class="label">vs Target ' + targetPct + '%</div><div class="value">' + (overall.rate != null ? (overall.rate >= target ? '✓' : '✗') : '—') + '</div></div>';
+    }
 
     const focusWord = isOverallLatest ? 'Overall' : 'Focus day';
     let summary = 'SLU Branchline App Usage · ' + focusWord + ' <strong>' + latestLbl + '</strong>: ' + overall.total + ' trips, <strong>' + fmtPct(overall.rate) + '</strong> compliant (both Clock-In &amp; Clock-Out)';
@@ -78,19 +82,24 @@ const BauUIManager = (() => {
       if (rateDiff < -0.01) summary += ' Rate <strong>down ' + fmtPp(rateDiff) + '</strong> vs ' + prevLbl + '.';
       else if (rateDiff > 0.01) summary += ' Rate <strong>up ' + fmtPp(rateDiff) + '</strong> vs ' + prevLbl + '.';
     }
-    document.getElementById('summaryText').innerHTML = summary;
+    const summaryText = document.getElementById('summaryText');
+    if (summaryText) summaryText.innerHTML = summary;
 
-    // Bulk / Collection
-    document.getElementById('metricsBulk').innerHTML =
-      '<div class="metric"><div class="label">Rate</div><div class="value">' + fmtPct(bulk.rate) + '</div></div>' +
-      '<div class="metric"><div class="label">Trips</div><div class="value">' + bulk.total + '</div></div>' +
-      '<div class="metric"><div class="label">Miss</div><div class="value ' + (bulk.no ? 'neg' : '') + '">' + bulk.no + '</div></div>';
-    document.getElementById('metricsCollection').innerHTML =
-      '<div class="metric"><div class="label">Rate</div><div class="value">' + fmtPct(collection.rate) + '</div></div>' +
-      '<div class="metric"><div class="label">Trips</div><div class="value">' + collection.total + '</div></div>' +
-      '<div class="metric"><div class="label">Miss</div><div class="value ' + (collection.no ? 'neg' : '') + '">' + collection.no + '</div></div>';
+    const metricsBulk = document.getElementById('metricsBulk');
+    if (metricsBulk) {
+      metricsBulk.innerHTML =
+        '<div class="metric"><div class="label">Rate</div><div class="value">' + fmtPct(bulk.rate) + '</div></div>' +
+        '<div class="metric"><div class="label">Trips</div><div class="value">' + bulk.total + '</div></div>' +
+        '<div class="metric"><div class="label">Miss</div><div class="value ' + (bulk.no ? 'neg' : '') + '">' + bulk.no + '</div></div>';
+    }
+    const metricsCollection = document.getElementById('metricsCollection');
+    if (metricsCollection) {
+      metricsCollection.innerHTML =
+        '<div class="metric"><div class="label">Rate</div><div class="value">' + fmtPct(collection.rate) + '</div></div>' +
+        '<div class="metric"><div class="label">Trips</div><div class="value">' + collection.total + '</div></div>' +
+        '<div class="metric"><div class="label">Miss</div><div class="value ' + (collection.no ? 'neg' : '') + '">' + collection.no + '</div></div>';
+    }
 
-    // Own / TP
     const ownEl = document.getElementById('metricsOwn');
     const tpEl = document.getElementById('metricsTP');
     if (ownEl) {
@@ -106,7 +115,6 @@ const BauUIManager = (() => {
         '<div class="metric"><div class="label">Miss</div><div class="value ' + (tp.no ? 'neg' : '') + '">' + tp.no + '</div></div>';
     }
 
-    // Miss panels
     const lateDcPanel = document.getElementById('lateDcPanel');
     if (lateDcPanel) {
       if (!dcMissList || !dcMissList.length) {
@@ -128,7 +136,7 @@ const BauUIManager = (() => {
       }
     }
 
-    // Tables
+    // Detail tables (always fill — matches HTML headers with Prev Rate / Difference)
     renderTable('tbodyDC', dcRows, [
       { fn: r => r.key },
       { fn: r => r.total },
@@ -151,7 +159,7 @@ const BauUIManager = (() => {
       { fn: r => fmtPp(r.delta), cls: r => deltaClass(r.delta) }
     ]);
 
-    renderTable('tbodyDriver', driverRows, [
+    renderTable('tbodyDriver', (driverRows || []).slice(0, 50), [
       { fn: r => r.key },
       { fn: r => r.total },
       { fn: r => r.no, cls: r => r.no > 0 ? 'neg' : '' },
@@ -161,7 +169,7 @@ const BauUIManager = (() => {
       { fn: r => fmtPp(r.delta), cls: r => deltaClass(r.delta) }
     ]);
 
-    renderTable('tbodyRoutes', routeRows.slice(0, 40), [
+    renderTable('tbodyRoutes', (routeRows || []).slice(0, 40), [
       { fn: r => r.key },
       { fn: r => r.total },
       { fn: r => r.no, cls: r => r.no > 0 ? 'neg' : '' },
@@ -179,8 +187,7 @@ const BauUIManager = (() => {
       { fn: r => fmtPp(r.delta), cls: r => deltaClass(r.delta) }
     ]);
 
-    // Miss detail
-    renderTable('tbodyMissDetail', missDetail.slice(0, 200), [
+    renderTable('tbodyMissDetail', (missDetail || []).slice(0, 200), [
       { fn: r => r.date },
       { fn: r => r.shipmentNo || '—' },
       { fn: r => r.driver },
@@ -193,7 +200,15 @@ const BauUIManager = (() => {
       { fn: r => r.issue, cls: () => 'neg' }
     ]);
 
-    BauChartManager.render(dcMissList, spMissList, driverMissList, histRows, targetPct);
+    // Optional independent detail filter (only if toolbar exists in DOM)
+    if (typeof BauDetailFilter !== 'undefined' && BauDetailFilter.render &&
+        document.getElementById('bauDetailModeFilter')) {
+      BauDetailFilter.render(dateLatest);
+    }
+
+    if (typeof BauChartManager !== 'undefined' && BauChartManager.render) {
+      BauChartManager.render(dcMissList, spMissList, driverMissList, histRows, targetPct);
+    }
 
     const loading = document.getElementById('loading');
     const loadingCompare = document.getElementById('loadingCompare');
