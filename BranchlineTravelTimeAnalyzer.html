@@ -19,7 +19,7 @@
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;">
-        <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.2);color:#fff;text-decoration:none;font-weight:600;font-size:0.88rem;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.35);white-space:nowrap;">← Back to Hub</a>
+        <a href="index.html" class="hub-link">← Back to Hub</a>
       </div>
     </div>
   </div>
@@ -45,6 +45,16 @@
     </div>
 
     <div id="results" class="hidden">
+      <div class="blt-main-tabs">
+        <button type="button" class="blt-main-tab active" data-main="day">📅 Day Comparison</button>
+        <button type="button" class="blt-main-tab" data-main="alldata">📋 All Data</button>
+        <button type="button" class="blt-main-tab" data-main="report">📑 Branchline Report</button>
+        <button type="button" class="blt-main-tab" data-main="monthly">📆 Monthly Report</button>
+        <button type="button" class="blt-main-tab" data-main="weekly">📊 Weekly / Monthly</button>
+        <button type="button" class="blt-main-tab" data-main="matrix">📈 Rate Matrix</button>
+      </div>
+
+      <div id="bltMainDay" class="blt-main-panel">
       <!-- Comparison -->
       <div class="card">
         <h2><span class="icon">📊</span> SLU Branchline Comparison</h2>
@@ -92,7 +102,7 @@
       <div class="charts-row">
         <div class="card">
           <h2><span class="icon">📍</span> Late by DC</h2>
-          <p class="section-note">Grouped by DC</p>
+          <p class="section-note">Grouped by DC INTENDED</p>
           <div class="chart-wrap"><canvas id="chartDC"></canvas></div>
         </div>
         <div class="card">
@@ -118,7 +128,7 @@
       <div class="card">
         <h2><span class="icon">📋</span> Detail Tables</h2>
         <div class="tabs">
-          <div class="tab active" data-tab="tabDC">Daily Comparison per DC</div>
+          <div class="tab active" data-tab="tabDC">Daily Comparison per DC Intended</div>
           <div class="tab" data-tab="tabSP">SP Performance</div>
           <div class="tab" data-tab="tabSpLateRoutes">SP Late Routes</div>
           <div class="tab" data-tab="tabRoutes">Routes</div>
@@ -129,7 +139,7 @@
         </div>
 
         <div id="tabDC" class="tab-panel active">
-          <p class="section-note">DC performance · current day vs previous</p>
+          <p class="section-note">DC Intended performance (code → name) · current day vs previous</p>
           <div class="table-scroll">
             <table>
               <thead>
@@ -206,7 +216,7 @@
         </div>
 
         <div id="tabLateDetail" class="tab-panel">
-          <p class="section-note">If Actual Truck Dispatch Time is blank → shows <strong>Not on time</strong>.</p>
+          <p class="section-note">Times as hours &amp; minutes (e.g. 2h 15m). If Actual Truck Dispatch Time is blank → shows <strong>Not on time</strong>.</p>
           <div class="table-scroll">
             <table>
               <thead>
@@ -229,7 +239,7 @@
         </div>
 
         <div id="tabHistory" class="tab-panel">
-          <p class="section-note">Daily SLU Branchline achievement rate</p>
+          <p class="section-note">Daily SLU Branchline achievement rate (most recent first)</p>
           <div class="table-scroll">
             <table>
               <thead>
@@ -267,12 +277,10 @@
             <div id="peWeeklyView" class="hidden"></div>
             <div id="peTableView" class="hidden"></div>
           </div>
-          <p class="section-note" style="margin-top:12px;">
-          </p>
         </div>
 
         <div id="tabSpDelay" class="tab-panel">
-          <p class="section-note">Top delay contributors by <strong>Service Partner</p>
+          <p class="section-note">Top delay contributors by <strong>Service Partner</strong> &amp; route</p>
           <div class="sp-delay-toolbar">
             <div>
               <label class="pe-label" for="spDelayModeFilter">Filter by</label>
@@ -337,6 +345,133 @@
           <div id="spDelayDetail"></div>
         </div>
       </div>
+
+      </div><!-- /bltMainDay -->
+
+      <!-- ALL DATA -->
+      <div id="bltMainAllData" class="blt-main-panel hidden">
+        <div class="card">
+          <h2><span class="icon">📋</span> All Data Explorer</h2>
+          <p class="section-note">Full branchline trip list · filter by date, SP, trucker, line type, DC, on-time</p>
+          <div class="sp-delay-toolbar" style="flex-wrap:wrap;">
+            <div><label class="pe-label">Shipment / Task</label><input type="search" id="bltAdSearchTask" placeholder="e.g. ZX069…" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;"></div>
+            <div><label class="pe-label">Plate</label><input type="search" id="bltAdSearchPlate" placeholder="Plate" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;"></div>
+            <div><label class="pe-label">From</label><select id="bltAdDateFrom"></select></div>
+            <div><label class="pe-label">To</label><select id="bltAdDateTo"></select></div>
+            <div><label class="pe-label">SP</label><select id="bltAdSp"></select></div>
+            <div><label class="pe-label">Trucker</label><select id="bltAdTrucker"></select></div>
+            <div><label class="pe-label">Line type</label><select id="bltAdLineType"></select></div>
+            <div><label class="pe-label">DC Intended</label><select id="bltAdDc"></select></div>
+            <div><label class="pe-label">On time</label>
+              <select id="bltAdOnTime">
+                <option value="ALL">All</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+            <div style="align-self:flex-end;"><button type="button" id="bltAdClear" class="sp-delay-mini-btn">Clear</button></div>
+          </div>
+          <p class="section-note" id="bltAdMeta"></p>
+          <div class="table-scroll" style="max-height:480px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th><th>Shipment</th><th>Plate</th><th>Route</th><th>SP</th><th>DC</th>
+                  <th>Line</th><th>Trucker</th><th>On Time</th><th>Plan TT</th><th>Actual TT</th><th>Delay</th>
+                </tr>
+              </thead>
+              <tbody id="bltAdBody"></tbody>
+            </table>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:10px;">
+            <button type="button" id="bltAdPrev" class="sp-delay-mini-btn">← Prev</button>
+            <button type="button" id="bltAdNext" class="sp-delay-mini-btn">Next →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BRANCHLINE REPORT -->
+      <div id="bltMainReport" class="blt-main-panel hidden">
+        <div class="card">
+          <h2><span class="icon">📑</span> Branchline Travel Time Report</h2>
+          <div class="date-selectors">
+            <div>
+              <label>Period type</label>
+              <select id="bltTrMode">
+                <option value="day">Day</option>
+                <option value="week">Week</option>
+                <option value="month">Month</option>
+              </select>
+            </div>
+            <div>
+              <label>Focus</label>
+              <select id="bltTrFocus"></select>
+            </div>
+          </div>
+          <div id="bltTrPanel"></div>
+        </div>
+      </div>
+
+      <!-- MONTHLY REPORT -->
+      <div id="bltMainMonthly" class="blt-main-panel hidden">
+        <div class="card">
+          <h2><span class="icon">📆</span> Monthly Report</h2>
+          <div class="date-selectors">
+            <div>
+              <label>Month</label>
+              <select id="bltMrMonth"></select>
+            </div>
+          </div>
+          <div id="bltMrPanel"></div>
+        </div>
+      </div>
+
+      <!-- WEEKLY / MONTHLY -->
+      <div id="bltMainWeekly" class="blt-main-panel hidden">
+        <div class="card">
+          <h2><span class="icon">📊</span> Weekly / Monthly Comparison</h2>
+          <div class="tabs" style="border:none;padding:0;margin-bottom:10px;">
+            <button type="button" class="tab blt-wm-mode active" data-mode="weekly">Weekly</button>
+            <button type="button" class="tab blt-wm-mode" data-mode="monthly">Monthly</button>
+          </div>
+          <p class="section-note" id="bltWmNote"></p>
+          <div class="charts-row">
+            <div class="card" style="margin:0;box-shadow:none;">
+              <h2 style="font-size:0.95rem;">Trend</h2>
+              <div class="chart-wrap history-chart-wrap"><canvas id="bltWmTrendChart"></canvas></div>
+            </div>
+            <div class="card" style="margin:0;box-shadow:none;">
+              <h2 style="font-size:0.95rem;">Last 2 periods</h2>
+              <div class="chart-wrap"><canvas id="bltWmCompareChart"></canvas></div>
+            </div>
+          </div>
+          <div class="table-scroll" style="margin-top:12px;">
+            <table>
+              <thead>
+                <tr><th>Period</th><th>Overall</th><th>Bulk</th><th>Collection</th></tr>
+              </thead>
+              <tbody id="bltWmBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- RATE MATRIX -->
+      <div id="bltMainMatrix" class="blt-main-panel hidden">
+        <div class="card">
+          <h2><span class="icon">📈</span> Rate Matrix</h2>
+          <div class="tabs" style="border:none;padding:0;margin-bottom:10px;">
+            <button type="button" class="tab blt-rm-mode active" data-mode="weekly">Weekly</button>
+            <button type="button" class="tab blt-rm-mode" data-mode="monthly">Monthly</button>
+          </div>
+          <p class="section-note" id="bltRmNote"></p>
+          <h3 style="font-size:0.95rem;margin:8px 0;">Scope board</h3>
+          <div id="bltRmBoard"></div>
+          <h3 style="font-size:0.95rem;margin:16px 0 8px;">By DC Intended</h3>
+          <div id="bltRmDcBoard"></div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -347,6 +482,11 @@
   <script src="bltUIManager.js"></script>
   <script src="bltDelayReason.js"></script>
   <script src="bltSpDelay.js"></script>
+  <script src="bltAllData.js"></script>
+  <script src="bltWeeklyMonthly.js"></script>
+  <script src="bltRateMatrix.js"></script>
+  <script src="bltTravelReport.js"></script>
+  <script src="bltMonthlyReport.js"></script>
   <script src="bltApp.js"></script>
 </body>
 </html>
