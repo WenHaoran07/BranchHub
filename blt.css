@@ -39,7 +39,14 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(180deg, rgba(245,245,245,0.50) 0%, rgba(245,245,245,0.92) 140%),
+    url('FleetTeam.jpg');
+  background-size: cover;
+  background-position: center -40%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: var(--text);
   line-height: 1.5;
   min-height: 100vh;
@@ -117,15 +124,14 @@ body {
 .upload-icon { font-size: 2.8rem; margin-bottom: 8px; }
 .upload-box strong { color: var(--jt-red); }
 .upload-box p { color: var(--muted); font-size: 0.9rem; margin-top: 6px; }
-
 /* Cards */
 .card {
   background: var(--card);
-  border-radius: 14px;
-  padding: 20px 22px;
-  margin-bottom: 18px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.03);
+  border: 1px solid rgba(0,0,0,0.06);
 }
 .card h2 {
   font-size: 1.05rem;
@@ -863,4 +869,232 @@ tr.top-culprit td:first-child::before {
   font-size: 0.92rem;
   margin-bottom: 10px;
   color: var(--jt-red-dark);
+}
+
+/* ==========================================================================
+   Main tabs + Rate Matrix (Mainline feature ports)
+   ========================================================================== */
+.blt-main-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.blt-main-tab {
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+}
+.blt-main-tab.active {
+  background: var(--jt-red);
+  border-color: var(--jt-red);
+  color: #fff;
+}
+.blt-main-panel.hidden { display: none !important; }
+tr.late-row td { background: #FFF8E1; }
+.rm-table th { white-space: nowrap; }
+.rm-scope { font-weight: 700; min-width: 120px; }
+.rm-target { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+.rm-sub { font-size: 0.72rem; color: var(--muted); }
+.rm-ok { background: #E8F5E9; color: #1B5E20; }
+.rm-miss { background: #FFEBEE; color: #B71C1C; }
+
+
+/* ==========================================================================
+   UI polish (clean, less clutter)
+   ========================================================================== */
+
+.header {
+  padding: 10px 20px;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.06);
+}
+.hub-link {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.28);
+  transition: background 0.15s;
+}
+.hub-link:hover { background: rgba(255,255,255,0.28); }
+
+.upload-gif { width: 64px; height: 64px; margin: 0 auto 4px; }
+.upload-box p { margin-top: 2px; font-size: 0.88rem; }
+.upload-box:hover, .upload-box.dragover {
+  box-shadow: 0 0 0 3px rgba(230,0,18,0.08);
+}
+
+.loading {
+  padding: 28px 20px;
+  border-radius: 16px;
+  font-size: 0.95rem;
+}
+
+/* Main navigation */
+.blt-main-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+.blt-main-tab {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  font-size: 0.84rem;
+  font-weight: 650;
+  color: #6B7280;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.blt-main-tab:hover { background: #F3F4F6; color: #111; }
+.blt-main-tab.active {
+  background: var(--jt-red);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(230,0,18,0.25);
+}
+
+/* Detail tabs */
+.tabs {
+  gap: 4px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+}
+.tab {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #F3F4F6;
+  border: 1px solid transparent;
+  color: #6B7280;
+}
+.tab:hover { color: #111; background: #E5E7EB; }
+.tab.active {
+  background: var(--jt-red);
+  border-color: var(--jt-red);
+  color: #fff;
+}
+
+.card h2 {
+  font-size: 0.98rem;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+.card h2 .icon {
+  width: 26px; height: 26px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.date-selectors {
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+}
+.date-selectors label {
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.date-selectors select {
+  border-radius: 10px;
+  min-width: 140px;
+}
+.date-selectors button {
+  border-radius: 10px;
+  padding: 8px 16px;
+}
+
+.date-info { margin-bottom: 10px; font-size: 0.85rem; }
+.badge, .target-badge {
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+}
+
+.metrics {
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.metric {
+  border-radius: 12px;
+  padding: 14px 12px;
+  background: #FAFBFC;
+  border: 1px solid rgba(0,0,0,0.05);
+  transition: transform 0.12s ease;
+}
+.metric .label {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+.metric .value { font-size: 1.35rem; letter-spacing: -0.02em; }
+
+.summary-box {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 0 10px 10px 0;
+  font-size: 0.88rem;
+  background: #FFFBEB;
+  border-left: 3px solid #F59E0B;
+  color: #78350F;
+}
+
+.charts-row, .split-row {
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.chart-wrap { height: 240px; }
+
+.table-scroll {
+  max-height: 360px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+th {
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  padding: 9px 10px;
+}
+td { padding: 9px 10px; font-size: 0.86rem; }
+tr:hover td { background: #F9FAFB; }
+
+.section-note {
+  font-size: 0.8rem;
+  color: #6B7280;
+  margin-bottom: 8px;
+}
+
+.sp-delay-toolbar, .pe-toolbar {
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin: 8px 0 12px;
+}
+
+.rm-ok { background: #ECFDF5; color: #065F46; }
+.rm-miss { background: #FEF2F2; color: #991B1B; }
+.rm-table td, .rm-table th { text-align: center; }
+.rm-table td:first-child, .rm-table th:first-child { text-align: left; }
+
+@media (max-width: 720px) {
+  .container { padding: 12px 12px 32px; }
+  .header h1 { font-size: 1.1rem; }
+  .logo-gif { width: 44px; height: 44px; }
 }
