@@ -28,9 +28,14 @@ const BltApp = (() => {
           BltDelayReason.render(dateLatest);
         }
         if (typeof BltSpDelay !== 'undefined') {
-          // Default SP Delay view to focus date (or Overall)
           BltSpDelay.render(dateLatest || 'ALL');
         }
+        // Feature modules (mainline ports)
+        if (typeof BltAllData !== 'undefined') BltAllData.onDataReady();
+        if (typeof BltWeeklyMonthly !== 'undefined') BltWeeklyMonthly.onDataReady();
+        if (typeof BltRateMatrix !== 'undefined') BltRateMatrix.onDataReady();
+        if (typeof BltTravelReport !== 'undefined') BltTravelReport.onDataReady();
+        if (typeof BltMonthlyReport !== 'undefined') BltMonthlyReport.onDataReady();
       } catch (err) {
         console.error(err);
         alert('Error during comparison: ' + err.message);
@@ -50,10 +55,41 @@ const BltApp = (() => {
     runCompare(d1, d2, true);
   }
 
+  function showMainPanel(id) {
+    const map = {
+      day: 'bltMainDay',
+      alldata: 'bltMainAllData',
+      report: 'bltMainReport',
+      monthly: 'bltMainMonthly',
+      weekly: 'bltMainWeekly',
+      matrix: 'bltMainMatrix'
+    };
+    document.querySelectorAll('.blt-main-panel').forEach(p => p.classList.add('hidden'));
+    document.querySelectorAll('.blt-main-tab').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-main') === id);
+    });
+    const el = document.getElementById(map[id] || 'bltMainDay');
+    if (el) el.classList.remove('hidden');
+  }
+
+  function initMainTabs() {
+    document.querySelectorAll('.blt-main-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        showMainPanel(btn.getAttribute('data-main') || 'day');
+      });
+    });
+  }
+
   function init() {
     BltUIManager.initTabs();
+    initMainTabs();
     if (typeof BltDelayReason !== 'undefined') BltDelayReason.init();
     if (typeof BltSpDelay !== 'undefined') BltSpDelay.init();
+    if (typeof BltAllData !== 'undefined') BltAllData.init();
+    if (typeof BltWeeklyMonthly !== 'undefined') BltWeeklyMonthly.init();
+    if (typeof BltRateMatrix !== 'undefined') BltRateMatrix.init();
+    if (typeof BltTravelReport !== 'undefined') BltTravelReport.init();
+    if (typeof BltMonthlyReport !== 'undefined') BltMonthlyReport.init();
 
     BltFileProcessor.init((d1, d2) => {
       runCompare(d1, d2, false);
