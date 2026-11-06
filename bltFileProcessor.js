@@ -68,6 +68,8 @@ const BltFileProcessor = (() => {
       if (lower === 'route' || lower === 'route label') colMap.route = i;
       if (lower === 'region') colMap.region = i;
       if (lower === 'date') colMap.date = i;
+      if (lower === 'week') colMap.week = i;
+      if (lower === 'month') colMap.month = i;
       if (lower.includes('shipmentno') || lower === 'shipment no') colMap.shipmentNo = i;
       if (lower.includes('unique code')) colMap.uniqueCode = i;
       if (lower.includes('task status')) colMap.status = i;
@@ -89,7 +91,7 @@ const BltFileProcessor = (() => {
       else if (colMap.dispatch == null && lower.includes('dispatch') && lower.includes('time')) colMap.dispatch = i;
     });
 
-    const { parseDateKey, cleanText, parseTravelMinutes, resolveDcName } = BltUtils;
+    const { parseDateKey, cleanText, parseTravelMinutes, resolveDcName, weekKey, monthKey } = BltUtils;
 
     const normalized = aoa.slice(1).map(r => {
       const dateVal = (colMap.date != null ? r[colMap.date] : null) ?? (colMap.arrival != null ? r[colMap.arrival] : null);
@@ -110,9 +112,14 @@ const BltFileProcessor = (() => {
       // DC INTENDED is a code → resolve to DC name for grouping/display
       const dcIntendedCode = cleanText(get(colMap.dcIntended)) || '(blank)';
       const dcName = resolveDcName(dcIntendedCode);
+      const carrierName = cleanText(get(colMap.carrierName)) || '(blank)';
 
       return {
         dateKey,
+        week: dateKey ? weekKey(dateKey) : null,
+        month: dateKey ? monthKey(dateKey) : null,
+        weekLabel: cleanText(get(colMap.week)),
+        monthLabel: cleanText(get(colMap.month)),
         onTime, // YES / NO / empty
         hasDispatch,
         missingDispatch: !hasDispatch,
@@ -123,6 +130,7 @@ const BltFileProcessor = (() => {
         region: cleanText(get(colMap.region)) || 'SLU',
         shipmentNo: cleanText(get(colMap.shipmentNo)),
         uniqueCode: cleanText(get(colMap.uniqueCode)),
+        taskId: cleanText(get(colMap.shipmentNo)) || cleanText(get(colMap.uniqueCode)),
         status,
         mission: cleanText(get(colMap.mission)),
         depDc: cleanText(get(colMap.depDc)) || '(blank)',
@@ -130,7 +138,8 @@ const BltFileProcessor = (() => {
         dcIntended: dcIntendedCode,
         dcName,
         sp: cleanText(get(colMap.phSp)) || cleanText(get(colMap.spNames)) || '(blank)',
-        carrierName: cleanText(get(colMap.carrierName)) || '(blank)',
+        carrierName,
+        trucker: carrierName,
         carrier: cleanText(get(colMap.carrier)) || '(blank)',
         lineType: cleanText(get(colMap.lineType)) || '(blank)',
         destOutlet: cleanText(get(colMap.destOutlet)),
