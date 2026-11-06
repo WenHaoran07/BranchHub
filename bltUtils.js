@@ -126,9 +126,48 @@ const BltUtils = (() => {
     return DC_CODE_MAP[key] || key;
   }
 
+  /** Excel WEEKNUM(date, 1) — week starts Sunday */
+  function excelWeekNum(dateKey) {
+    if (!dateKey) return null;
+    const [y, m, d] = String(dateKey).split('-').map(Number);
+    if (!y || !m || !d) return null;
+    const date = new Date(Date.UTC(y, m - 1, d));
+    const jan1 = new Date(Date.UTC(y, 0, 1));
+    const dayOfYear = Math.floor((date - jan1) / 86400000) + 1;
+    const jan1Dow = jan1.getUTCDay();
+    return Math.floor((dayOfYear + jan1Dow - 1) / 7) + 1;
+  }
+
+  /** Period key e.g. 2026-W44 */
+  function weekKey(dateKey) {
+    if (!dateKey) return null;
+    const wn = excelWeekNum(dateKey);
+    if (wn == null) return null;
+    const y = parseInt(String(dateKey).slice(0, 4), 10);
+    return y + '-W' + pad2(wn);
+  }
+
+  function monthKey(dateKey) {
+    return dateKey ? String(dateKey).slice(0, 7) : null;
+  }
+
+  function isBulk(lineType) {
+    return /bulk/i.test(String(lineType || ''));
+  }
+  function isCollection(lineType) {
+    return /collection/i.test(String(lineType || ''));
+  }
+  function filterLineScope(rows, scope) {
+    if (!scope || scope === 'ALL') return rows || [];
+    if (scope === 'BULK') return (rows || []).filter(r => isBulk(r.lineType));
+    if (scope === 'COLLECTION') return (rows || []).filter(r => isCollection(r.lineType));
+    return rows || [];
+  }
+
   return {
     TARGET, MAX_TRAVEL_MIN, DC_CODE_MAP,
     parseDateKey, groupBy, stats,
-    parseTravelMinutes, fmtPct, fmtNum, fmtPp, fmtDuration, cleanText, resolveDcName
+    parseTravelMinutes, fmtPct, fmtNum, fmtPp, fmtDuration, cleanText, resolveDcName,
+    excelWeekNum, weekKey, monthKey, isBulk, isCollection, filterLineScope
   };
 })();
