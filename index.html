@@ -93,7 +93,7 @@
       align-items: center;
     }
 
-   .intro {
+    .intro {
       text-align: center;
       margin-top: 50px;
       margin-bottom: -70px;
@@ -355,7 +355,7 @@
     footer {
       text-align: center;
       padding: 18px 16px;
-      font-size: 0.62rem;
+      font-size: 0.82rem;
       color: var(--muted);
       border-top: 1px solid var(--border);
       background: var(--card);
@@ -400,6 +400,8 @@
     }
     #loginGate.hidden { display: none; }
     .login-card {
+      position: relative;
+      overflow: visible;
       background: #fff;
       width: 100%;
       max-width: 380px;
@@ -477,6 +479,125 @@
     body.locked > :not(#loginGate) {
       visibility: hidden;
     }
+
+    /* ===== Floating Main Hub Button in Lower Left ===== */
+    .btn-main-hub {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 999;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #1565C0, #0D47A1);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(13, 71, 161, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s;
+      white-space: nowrap;
+    }
+    .btn-main-hub:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+      box-shadow: 0 6px 20px rgba(13, 71, 161, 0.45);
+    }
+    .btn-main-hub:active { transform: scale(0.97); }
+    .btn-main-hub .mh-ico { font-size: 1rem; line-height: 1; }
+
+    /* Zoro peek on login white box */
+    .login-card {
+      position: relative;
+      overflow: visible;
+    }
+    .login-peek-zoro {
+      position: absolute;
+      right: -86px;
+      top: 40%;
+      transform: translateY(-50%) scaleX(-1) rotate(-24deg);
+      width: 118px;
+      height: auto;
+      z-index: 5;
+      pointer-events: none;
+      user-select: none;
+      filter: drop-shadow(-2px 4px 8px rgba(0,0,0,0.28));
+    }
+    @media (max-width: 520px) {
+      .login-peek-zoro { right: -30px; width: 82px; }
+    }
+
+    /* Zoro runs right → left across Branch Hub */
+    #mainHubTransition {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: none;
+      background: transparent;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    #mainHubTransition.show { display: block; }
+    #mainHubTransition .mh-tx-mover {
+      position: absolute;
+      top: 80%;
+      left: 0;
+      height: min(32vh, 320px);
+      will-change: transform;
+      transform: translate(100vw, -40%);
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,0.28));
+    }
+    #mainHubTransition.show .mh-tx-mover {
+      animation: zoroRunRL 7.5s linear forwards;
+    }
+    @keyframes zoroRunRL {
+      0%   { transform: translate(100vw, -40%); }
+      100% { transform: translate(-120%, -40%); }
+    }
+    #mainHubTransition .mh-tx-mover img {
+      height: 100%;
+      width: auto;
+      display: block;
+      object-fit: contain;
+      mix-blend-mode: screen;
+    }
+    #mainHubTransition .mh-tx-ui {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    #mainHubTransition .mh-tx-label {
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.95rem;
+      background: rgba(46, 125, 50, 0.9);
+      padding: 8px 16px;
+      border-radius: 999px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    #mainHubTransition .mh-tx-skip {
+      pointer-events: auto;
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.45);
+      color: #fff;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    #mainHubTransition .mh-tx-skip:hover { background: rgba(0,0,0,0.75); }
+
   </style>
 </head>
 <body class="locked">
@@ -484,9 +605,10 @@
   <!-- Password gate -->
   <div id="loginGate">
     <div class="login-card">
-     <div> <img src="JNTLogo.png" alt="J&T Express Logo" class="Password"
-  style="width:120px;height:auto;object-fit:contain;display:block;margin:0 auto 16px;border-radius:10px;">
-    </div>
+      <img src="SideLuffy.png" alt="" class="login-peek-zoro">
+      <div> 
+        <img src="JNTLogo.png" alt="J&T Express Logo" class="Password" style="width:120px;height:auto;object-fit:contain;display:block;margin:0 auto 16px;border-radius:10px;">
+      </div>
       <h2>Branchline Analyzers</h2>
       <p class="login-sub">Enter password to continue</p>
       <div id="loginError" class="login-error">Incorrect password. Please try again.</div>
@@ -507,19 +629,24 @@
     </div>
   </header>
 
+  <!-- Floating Main Hub Button in Lower Left -->
+  <button type="button" class="btn-main-hub" id="btnMainHub" title="Open Main Hub">
+    <span class="mh-ico">🔗</span>
+    <span>Main Hub</span>
+  </button>
+
   <main class="container">
     <div class="intro">
-      <h2></h2>
+      <h2>Select Analyzer</h2>
     </div>
 
     <div class="carousel-wrap">
       <div class="carousel-stage" id="carouselStage">
 
-<a class="carousel-card travel-time" href="BranchlineTravelTimeAnalyzer.html" data-index="0" title="Open Branchline Travel Time">
-          <img src="BranchDrift.gif" alt="Branchline Travel Time"style="width:100%;height:200px;border-radius:12px 12px 0 0;display:block;margin:-28px -24px 16px -24px;width:calc(100% + 48px);">
+        <a class="carousel-card travel-time" href="BranchlineTravelTimeAnalyzer.html" data-index="0" title="Open Branchline Travel Time">
+          <img src="BranchDrift.gif" alt="Branchline Travel Time" style="width:100%;height:200px;border-radius:12px 12px 0 0;display:block;margin:-28px -24px 16px -24px;width:calc(100% + 48px);">
           <h3 style="text-align: center;">Branchline Travel Time</h3>
-          <p>
-          </p>
+          <p></p>
           <div class="card-meta">
             <span class="badge target">Target 98%</span>
             <span class="badge">Delay Reason</span>
@@ -529,10 +656,9 @@
         </a>
 
         <a class="carousel-card app-usage" href="BranchlineAppUsageAnalyzer.html" data-index="1" title="Open Branchline App Usage">
-          <img src="AppUsage2.gif" alt="App Usage"style="width:100%;height:200px;border-radius:12px 12px 0 0;display:block;margin:-28px -24px 16px -24px;width:calc(100% + 48px);">
+          <img src="AppUsage2.gif" alt="App Usage" style="width:100%;height:200px;border-radius:12px 12px 0 0;display:block;margin:-28px -24px 16px -24px;width:calc(100% + 48px);">
           <h3 style="text-align: center;">Branchline App Usage</h3>
-          <p>
-          </p>
+          <p></p>
           <div class="card-meta">
             <span class="badge target">Target 99%</span>
             <span class="badge">By SP</span>
@@ -542,10 +668,9 @@
         </a>
 
         <a class="carousel-card departure-rate" href="BranchlineDepartureRateAnalyzer.html" data-index="2" title="Open Branchline Departure Rate">
-          <img src="BranchDeparture.gif" alt="Departure Rate"style="width:100%;height:200px;border-radius:12px 12px 0 0;display:block;margin:-28px -24px 16px -24px;width:calc(100% + 48px);">
+          <img src="BranchDeparture.gif" alt="Departure Rate" style="width:100%;height:200px;border-radius:12px 12px 0 0;display:block;margin:-28px -24px 16px -24px;width:calc(100% + 48px);">
           <h3 style="text-align: center;">Branchline Departure Rate</h3>
-          <p>
-          </p>
+          <p></p>
           <div class="card-meta">
             <span class="badge target">Target 97%</span>
             <span class="badge">SP Late Routes</span>
@@ -569,7 +694,7 @@
   </main>
 
   <footer>
-    ©2026 - Vince Adesa · Branchline Analyzer Hub
+    ©2026 - Vince Adesa · J&T Branchline Analyzer Hub
   </footer>
 
   <script>
@@ -634,7 +759,6 @@
     let animating = false;
 
     function posClass(offset) {
-      // offset relative to active: 0 = front, -1 = left, +1 = right, else back
       if (offset === 0) return "pos-front";
       if (offset === -1 || offset === n - 1) return "pos-left";
       if (offset === 1 || offset === 1 - n) return "pos-right";
@@ -644,7 +768,6 @@
     function render() {
       cards.forEach((card, i) => {
         let offset = i - active;
-        // normalize to shortest direction for 3 cards
         if (offset > n / 2) offset -= n;
         if (offset < -n / 2) offset += n;
         card.classList.remove("pos-front", "pos-left", "pos-right", "pos-back");
@@ -671,18 +794,15 @@
       d.addEventListener("click", () => go(+d.dataset.go));
     });
 
-    // Click side cards → bring to front (don't navigate yet)
     cards.forEach((card, i) => {
       card.addEventListener("click", function (e) {
         if (i !== active) {
           e.preventDefault();
           go(i);
         }
-        // if front, let the <a href> navigate normally
       });
     });
 
-    // Keyboard
     document.addEventListener("keydown", function (e) {
       if (document.body.classList.contains("locked")) return;
       if (gate && !gate.classList.contains("hidden")) return;
@@ -697,7 +817,6 @@
       }
     });
 
-    // Touch / swipe
     let touchX = null;
     const stage = document.getElementById("carouselStage");
     stage.addEventListener("touchstart", (e) => {
@@ -715,5 +834,73 @@
     render();
   })();
   </script>
+
+  <!-- Zoro runs right → left, then opens Main Hub -->
+  <div id="mainHubTransition" aria-hidden="true">
+    <div class="mh-tx-mover">
+      <img id="mhTxGif" src="Zorro.gif" alt="Zoro">
+    </div>
+    <div class="mh-tx-ui">
+      <div class="mh-tx-label">Zoro is heading to Main Hub…</div>
+      <button type="button" class="mh-tx-skip" id="mhTxSkip">Skip</button>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    var MAIN_HUB_URL = 'https://mainline-analyzer.vercel.app/';
+    var GIF_SRC = 'Zorro.gif';
+    var DURATION_MS = 7500;
+
+    var btn = document.getElementById('btnMainHub');
+    var overlay = document.getElementById('mainHubTransition');
+    var mover = overlay && overlay.querySelector('.mh-tx-mover');
+    var img = document.getElementById('mhTxGif');
+    var skip = document.getElementById('mhTxSkip');
+    if (!btn || !overlay || !img) return;
+
+    var timer = null;
+    var going = false;
+
+    function goNow() {
+      if (going) return;
+      going = true;
+      if (timer) { clearTimeout(timer); timer = null; }
+      var url = MAIN_HUB_URL + (MAIN_HUB_URL.indexOf('?') >= 0 ? '&' : '?') + 'from=branchhub&tx=1';
+      window.location.href = url;
+    }
+
+    function playTransition() {
+      going = false;
+      if (timer) { clearTimeout(timer); timer = null; }
+      img.src = GIF_SRC + '?t=' + Date.now();
+      if (mover) {
+        mover.style.animation = 'none';
+        void mover.offsetWidth;
+        mover.style.animation = '';
+      }
+      overlay.classList.add('show');
+      overlay.setAttribute('aria-hidden', 'false');
+      timer = setTimeout(goNow, DURATION_MS);
+    }
+
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (document.body.classList.contains('locked')) return;
+      playTransition();
+    });
+
+    if (skip) skip.addEventListener('click', function () { goNow(); });
+
+    document.addEventListener('keydown', function (e) {
+      if (!overlay.classList.contains('show')) return;
+      if (e.key === 'Escape' || e.key === 'Enter') {
+        e.preventDefault();
+        goNow();
+      }
+    });
+  })();
+  </script>
+
 </body>
 </html>
