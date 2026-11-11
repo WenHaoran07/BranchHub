@@ -46,7 +46,7 @@ const BltDataAnalyzer = (() => {
     const prev = rowsForDateKey(allRows, datePrev);
     const latest = rowsForDateKey(allRows, dateLatest);
     const target = TARGET;
-    const targetPct = Math.round(target * 100);
+    const targetPct = Math.round(target * 100); // 97
     const isOverallLatest = !dateLatest || dateLatest === 'ALL';
     const isOverallPrev = !datePrev || datePrev === 'ALL';
 
@@ -109,6 +109,7 @@ const BltDataAnalyzer = (() => {
     const spRows = buildCompareRows(prev, latest, r => r.sp);
     const routeRows = buildCompareRows(prev, latest, r => r.route);
     const lineTypeRows = buildCompareRows(prev, latest, r => r.lineType || '(blank)');
+    const truckerRows = buildCompareRows(prev, latest, r => r.trucker || r.carrierName || '(blank)');
 
     // SP late routes (routes under each SP that have late trips)
     const spLateRoutes = {};
@@ -166,7 +167,7 @@ const BltDataAnalyzer = (() => {
     function forecastFrom(hist) {
       const pts = hist.filter(h => h.rate != null && h.total > 0);
       if (pts.length < 2) {
-        return { predictedRate: null, risk: 'unknown', sample: pts.length };
+        return { predictedRate: null, risk: 'unknown', trend: 'flat', sample: pts.length };
       }
       const n = pts.length;
       const recent = pts.slice(-Math.min(7, n));
@@ -195,7 +196,7 @@ const BltDataAnalyzer = (() => {
       bulk, bulkPrev, collection, collectionPrev,
       own, ownPrev, tp, tpPrev,
       dcLateList, spLateList, routeLateList,
-      dcRows, spRows, routeRows, lineTypeRows,
+      dcRows, spRows, routeRows, lineTypeRows, truckerRows,
       spLateRouteList,
       lateDetail, histRows, forecast
     };
