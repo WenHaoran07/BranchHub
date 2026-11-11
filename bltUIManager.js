@@ -41,7 +41,7 @@ const BltUIManager = (() => {
       bulk, bulkPrev, collection, collectionPrev,
       own, ownPrev, tp, tpPrev,
       dcLateList, spLateList, routeLateList,
-      dcRows, spRows, routeRows, lineTypeRows,
+      dcRows, spRows, routeRows, lineTypeRows, truckerRows,
       spLateRouteList, lateDetail, histRows, forecast
     } = data;
 
@@ -75,8 +75,8 @@ const BltUIManager = (() => {
       else if (rateDiff > 0.01) summary += ' Rate <strong>up '+fmtPp(rateDiff)+'</strong> vs '+prevLbl+'.';
     }
     if (forecast && forecast.trend) {
-    //  summary += ' Recent trend: <strong>'+forecast.trend+'</strong>';
-    //  if (forecast.risk === 'high') summary += ' · <span style="color:#E60012">risk of missing target</span>';
+      summary += ' Recent trend: <strong>'+forecast.trend+'</strong>';
+      if (forecast.risk === 'high') summary += ' · <span style="color:#E60012">risk of missing target</span>';
     }
     document.getElementById('summaryText').innerHTML = summary;
 
@@ -140,6 +140,16 @@ const BltUIManager = (() => {
       { key: 'rate', fn: r => fmtPct(r.rate), cls: r => rateClass(r.rate, target) },
       { key: 'prevRate', fn: r => fmtPct(r.prevRate) },
       { key: 'delta', fn: r => fmtPp(r.delta), cls: r => deltaClass(r.delta) }
+    ]);
+
+    renderTable('truckerBody', truckerRows || [], [
+      { key: 'key', label: 'Trucker' },
+      { key: 'total', label: 'Total' },
+      { key: 'yes', label: 'On Time' },
+      { key: 'no', label: 'Late' },
+      { key: 'rate', label: 'Rate', fmt: 'pct' },
+      { key: 'prevRate', label: 'Prev Rate', fmt: 'pct' },
+      { key: 'rateDiff', label: 'Rate Diff', fmt: 'pp' }
     ]);
 
     renderTable('routesBody', routeRows, [
