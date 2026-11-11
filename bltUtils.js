@@ -2,7 +2,7 @@
    MODULE: BLT UTILS (Branchline Travel Time shared helpers)
    ========================================================================== */
 const BltUtils = (() => {
-  const TARGET = 0.98; // SLU Branchline official target 98%
+  const TARGET = 0.97; // SLU Branchline target 97% (matches official report sheets)
 
   function pad2(n) { return String(n).padStart(2, '0'); }
 
