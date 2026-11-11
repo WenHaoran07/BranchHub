@@ -52,7 +52,7 @@
         <button type="button" class="blt-main-tab" data-main="monthly">📆 Monthly Report</button>
         <button type="button" class="blt-main-tab" data-main="weekly">📊 Weekly / Monthly</button>
         <button type="button" class="blt-main-tab" data-main="matrix">📈 Rate Matrix</button>
-      </div>
+</div>
 
       <div id="bltMainDay" class="blt-main-panel">
       <!-- Comparison -->
@@ -71,7 +71,7 @@
         </div>
         <div class="date-info">
           Comparing <span class="badge" id="datePrev"></span> vs <span class="badge" id="dateLatest"></span>
-          <span class="target-badge" id="targetBadgeText">Target 98%</span>
+          <span class="target-badge" id="targetBadgeText">Target 97%</span>
         </div>
         <div class="metrics" id="metricsOverall"></div>
         <div class="summary-box" id="summaryText"></div>
@@ -80,7 +80,7 @@
       <!-- Late panels -->
       <div class="card">
         <h2><span class="icon">⚠</span> Late DC &amp; Service Partners</h2>
-        <p class="section-note">(Current Day) based on <strong>DC INTENDED</strong> - entities with at least one late trip</p>
+        <p class="section-note">- entities with at least one late trip</p>
         <div id="lateDcPanel"></div>
         <div id="lateSpPanel" style="margin-top:16px;"></div>
         <div id="noLatePanel" class="hidden"></div>
@@ -102,7 +102,6 @@
       <div class="charts-row">
         <div class="card">
           <h2><span class="icon">📍</span> Late by DC</h2>
-          <p class="section-note">Grouped by DC INTENDED</p>
           <div class="chart-wrap"><canvas id="chartDC"></canvas></div>
         </div>
         <div class="card">
@@ -130,6 +129,7 @@
         <div class="tabs">
           <div class="tab active" data-tab="tabDC">Daily Comparison per DC Intended</div>
           <div class="tab" data-tab="tabSP">SP Performance</div>
+          <div class="tab" data-tab="tabTrucker">Truckers</div>
           <div class="tab" data-tab="tabSpLateRoutes">SP Late Routes</div>
           <div class="tab" data-tab="tabRoutes">Routes</div>
           <div class="tab" data-tab="tabLateDetail">Late Trip Detail</div>
@@ -139,7 +139,6 @@
         </div>
 
         <div id="tabDC" class="tab-panel active">
-          <p class="section-note">DC Intended performance (code → name) · current day vs previous</p>
           <div class="table-scroll">
             <table>
               <thead>
@@ -159,7 +158,6 @@
         </div>
 
         <div id="tabSP" class="tab-panel">
-          <p class="section-note">Service Partner (PH/SP) performance · current day vs previous</p>
           <div class="table-scroll">
             <table>
               <thead>
@@ -178,8 +176,26 @@
           </div>
         </div>
 
+        <div id="tabTrucker" class="tab-panel">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Trucker</th>
+                  <th>Total</th>
+                  <th>On Time</th>
+                  <th>Late</th>
+                  <th>Rate</th>
+                  <th>Prev Rate</th>
+                  <th>Rate Diff</th>
+                </tr>
+              </thead>
+              <tbody id="truckerBody"></tbody>
+            </table>
+          </div>
+        </div>
+
         <div id="tabSpLateRoutes" class="tab-panel">
-          <p class="section-note">Late routes grouped by Service Partner (focus day)</p>
           <div class="table-scroll">
             <table>
               <thead>
@@ -196,7 +212,6 @@
         </div>
 
         <div id="tabRoutes" class="tab-panel">
-          <p class="section-note">All routes · current day vs previous</p>
           <div class="table-scroll">
             <table>
               <thead>
@@ -216,7 +231,6 @@
         </div>
 
         <div id="tabLateDetail" class="tab-panel">
-          <p class="section-note">Times as hours &amp; minutes (e.g. 2h 15m). If Actual Truck Dispatch Time is blank → shows <strong>Not on time</strong>.</p>
           <div class="table-scroll">
             <table>
               <thead>
@@ -239,7 +253,6 @@
         </div>
 
         <div id="tabHistory" class="tab-panel">
-          <p class="section-note">Daily SLU Branchline achievement rate (most recent first)</p>
           <div class="table-scroll">
             <table>
               <thead>
@@ -352,7 +365,6 @@
       <div id="bltMainAllData" class="blt-main-panel hidden">
         <div class="card">
           <h2><span class="icon">📋</span> All Data Explorer</h2>
-          <p class="section-note">Full branchline trip list · filter by date, SP, trucker, line type, DC, on-time</p>
           <div class="sp-delay-toolbar" style="flex-wrap:wrap;">
             <div><label class="pe-label">Shipment / Task</label><input type="search" id="bltAdSearchTask" placeholder="e.g. ZX069…" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;"></div>
             <div><label class="pe-label">Plate</label><input type="search" id="bltAdSearchPlate" placeholder="Plate" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;"></div>
@@ -391,40 +403,54 @@
       </div>
 
       <!-- BRANCHLINE REPORT -->
-      <div id="bltMainReport" class="blt-main-panel hidden">
+            <div id="bltMainReport" class="blt-main-panel hidden">
         <div class="card">
-          <h2><span class="icon">📑</span> Branchline Travel Time Report</h2>
-          <div class="date-selectors">
+          <div class="tr-head-row">
             <div>
-              <label>Period type</label>
-              <select id="bltTrMode">
-                <option value="day">Day</option>
-                <option value="week">Week</option>
-                <option value="month">Month</option>
-              </select>
+              <h2><span class="icon">📑</span> Branchline Report</h2>
+              <p class="section-note" id="bltTravelReportNote">Branchline Travel Time Report (Overall + Bulk/Collection · DC · SP · Route)</p>
             </div>
-            <div>
-              <label>Focus</label>
-              <select id="bltTrFocus"></select>
-            </div>
+            <button type="button" class="tr-export-btn" id="btnTrExport">⬇ Export Excel</button>
           </div>
-          <div id="bltTrPanel"></div>
+          <div class="tr-subtabs">
+            <button type="button" class="tr-subtab active" data-tr-view="overall">Overall Report</button>
+            <button type="button" class="tr-subtab" data-tr-view="byDc">SLU by DC</button>
+            <button type="button" class="tr-subtab" data-tr-view="byTrucker">By Trucker / SP</button>
+            <button type="button" class="tr-subtab" data-tr-view="bulkRoutes">Bulk by Route</button>
+            <button type="button" class="tr-subtab" data-tr-view="collectionRoutes">Collection by Route</button>
+            <button type="button" class="tr-subtab" data-tr-view="bulkContrib">Bulk Contributors</button>
+            <button type="button" class="tr-subtab" data-tr-view="collectionContrib">Collection Contributors</button>
+            <button type="button" class="tr-subtab" data-tr-view="full">Full Report</button>
+          </div>
+          <div id="bltTravelReportView"></div>
         </div>
       </div>
 
+
       <!-- MONTHLY REPORT -->
-      <div id="bltMainMonthly" class="blt-main-panel hidden">
+            <div id="bltMainMonthly" class="blt-main-panel hidden">
         <div class="card">
-          <h2><span class="icon">📆</span> Monthly Report</h2>
-          <div class="date-selectors">
+          <div class="mr-head-row">
             <div>
-              <label>Month</label>
-              <select id="bltMrMonth"></select>
+              <h2><span class="icon">📆</span> Monthly Report</h2>
+              <p class="section-note" id="bltMonthlyReportNote">Weekly + monthly rates · Branchline / Bulk / Collection</p>
             </div>
+            <button type="button" class="mr-export-btn" id="btnMrExport">⬇ Export Excel</button>
           </div>
-          <div id="bltMrPanel"></div>
+          <div class="mr-subtabs">
+            <button type="button" class="mr-subtab active" data-mr-view="full">Full Report</button>
+            <button type="button" class="mr-subtab" data-mr-view="summary">Summary</button>
+            <button type="button" class="mr-subtab" data-mr-view="dc">By DC</button>
+            <button type="button" class="mr-subtab" data-mr-view="trucker">By Trucker / SP</button>
+            <button type="button" class="mr-subtab" data-mr-view="bulk">Bulk Routes</button>
+            <button type="button" class="mr-subtab" data-mr-view="collection">Collection Routes</button>
+            <button type="button" class="mr-subtab" data-mr-view="bulkContrib">Bulk Contributors</button>
+            <button type="button" class="mr-subtab" data-mr-view="collectionContrib">Collection Contributors</button>
+          </div>
+          <div id="bltMonthlyReportView"></div>
         </div>
       </div>
+
 
       <!-- WEEKLY / MONTHLY -->
       <div id="bltMainWeekly" class="blt-main-panel hidden">
@@ -460,20 +486,43 @@
       <div id="bltMainMatrix" class="blt-main-panel hidden">
         <div class="card">
           <h2><span class="icon">📈</span> Rate Matrix</h2>
-          <div class="tabs" style="border:none;padding:0;margin-bottom:10px;">
-            <button type="button" class="tab blt-rm-mode active" data-mode="weekly">Weekly</button>
-            <button type="button" class="tab blt-rm-mode" data-mode="monthly">Monthly</button>
+          <div class="pe-toolbar rm-toolbar">
+            <div class="rm-filter-group">
+              <span class="rm-filter-label">Period</span>
+              <div class="pe-subtabs">
+                <button type="button" class="rm-subtab active" data-rm-mode="weekly">Weekly</button>
+                <button type="button" class="rm-subtab" data-rm-mode="monthly">Monthly</button>
+              </div>
+            </div>
+            <div class="rm-filter-group rm-period-group">
+              <span class="rm-filter-label" id="rmPeriodPickLabel">Week range</span>
+              <div id="rmPeriodPickWrap">
+                <select id="rmPeriodFrom" class="rm-period-select" title="From">
+                  <option value="">From (all)</option>
+                </select>
+                <span class="rm-range-sep">→</span>
+                <select id="rmPeriodTo" class="rm-period-select" title="To">
+                  <option value="">To (all)</option>
+                </select>
+              </div>
+            </div>
+            <div class="rm-filter-group">
+              <span class="rm-filter-label">Layout</span>
+              <div class="pe-subtabs">
+                <button type="button" class="rm-viewtab active" data-rm-view="scope">Summary</button>
+                <button type="button" class="rm-viewtab" data-rm-view="route">By Route</button>
+              </div>
+            </div>
+            <button type="button" class="wm-export-btn" id="btnRmExport">Export Excel</button>
           </div>
-          <p class="section-note" id="bltRmNote"></p>
-          <h3 style="font-size:0.95rem;margin:8px 0;">Scope board</h3>
-          <div id="bltRmBoard"></div>
-          <h3 style="font-size:0.95rem;margin:16px 0 8px;">By DC Intended</h3>
-          <div id="bltRmDcBoard"></div>
+          <p class="section-note" id="rmFilterNote">Weekly · All weeks</p>
+          <div id="rmView" class="rm-view-roomy"></div>
         </div>
       </div>
 
     </div>
   </div>
+
 
   <script src="bltUtils.js"></script>
   <script src="bltFileProcessor.js"></script>
@@ -488,5 +537,15 @@
   <script src="bltTravelReport.js"></script>
   <script src="bltMonthlyReport.js"></script>
   <script src="bltApp.js"></script>
+
+  <div id="mrTableExpandOverlay" class="mr-expand-overlay hidden" aria-hidden="true">
+    <div class="mr-expand-panel" role="dialog" aria-modal="true">
+      <div class="mr-expand-bar">
+        <strong id="mrTableExpandTitle">Expanded table</strong>
+        <button type="button" class="mr-expand-close" id="mrTableExpandClose" title="Close (Esc)">✕</button>
+      </div>
+      <div id="mrTableExpandBody" class="mr-expand-scroll"></div>
+    </div>
+  </div>
 </body>
 </html>
