@@ -1,9 +1,9 @@
 /* ==========================================================================
    MODULE: BLT WEEKLY / MONTHLY COMPARISON
-   Scopes: Overall · Bulk · Collection · Target 98%
+   Scopes: Overall · Bulk · Collection · Target 97%
    ========================================================================== */
 const BltWeeklyMonthly = (() => {
-  const TARGET = 0.98;
+  const TARGET = 0.97;
   let mode = 'weekly'; // weekly | monthly
   let charts = { trend: null, compare: null };
 
@@ -100,7 +100,7 @@ const BltWeeklyMonthly = (() => {
             { label: 'Overall', data: overall, borderColor: '#E60012', tension: 0.25, fill: false },
             { label: 'Bulk', data: bulk, borderColor: '#1565C0', tension: 0.25, fill: false },
             { label: 'Collection', data: coll, borderColor: '#2E7D32', tension: 0.25, fill: false },
-            { label: 'Target 98%', data: labels.map(() => 98), borderColor: '#9E9E9E', borderDash: [6, 4], pointRadius: 0 }
+            { label: 'Target 97%', data: labels.map(() => 97), borderColor: '#9E9E9E', borderDash: [6, 4], pointRadius: 0 }
           ]
         },
         options: {
@@ -147,7 +147,7 @@ const BltWeeklyMonthly = (() => {
     const note = document.getElementById('bltWmNote');
     if (note) {
       note.textContent = (mode === 'weekly' ? 'Weekly' : 'Monthly') +
-        ' achievement · Target 98% · ' + keys.length + ' period(s)';
+        ' achievement · Target 97% · ' + keys.length + ' period(s)';
     }
   }
 
