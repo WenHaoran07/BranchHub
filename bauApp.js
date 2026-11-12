@@ -25,6 +25,9 @@ const BauApp = (() => {
       try {
         const data = BauDataAnalyzer.compute(datePrev, dateLatest, storedRows, storedDates);
         BauUIManager.render(data);
+        if (typeof BauDcRateReport !== 'undefined' && BauDcRateReport.render) {
+          BauDcRateReport.render(dateLatest);
+        }
         if (typeof BauSpRateReport !== 'undefined' && BauSpRateReport.render) {
           BauSpRateReport.render(dateLatest);
         }
@@ -59,9 +62,16 @@ const BauApp = (() => {
     const el = document.getElementById(map[id] || 'bauMainDay');
     if (el) el.classList.remove('hidden');
 
-    if (id === 'report' && typeof BauSpRateReport !== 'undefined' && BauSpRateReport.render) {
+    if (id === 'report') {
       const sel = document.getElementById('selectLatest');
-      BauSpRateReport.render(sel ? sel.value : null);
+      const prefer = sel ? sel.value : null;
+      // DC report owns shared week/daily filters — render first
+      if (typeof BauDcRateReport !== 'undefined' && BauDcRateReport.render) {
+        BauDcRateReport.render(prefer);
+      }
+      if (typeof BauSpRateReport !== 'undefined' && BauSpRateReport.render) {
+        BauSpRateReport.render(prefer);
+      }
     }
   }
 
@@ -77,6 +87,7 @@ const BauApp = (() => {
     BauUIManager.initTabs();
     initMainTabs();
     if (typeof BauSpRateReport !== 'undefined') BauSpRateReport.init();
+    if (typeof BauDcRateReport !== 'undefined') BauDcRateReport.init();
 
     BauFileProcessor.init((d1, d2) => {
       runCompare(d1, d2, false);
