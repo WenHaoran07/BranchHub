@@ -1,5 +1,6 @@
 /* ==========================================================================
    MODULE: BAU MAIN APPLICATION COORDINATOR (Branchline App Usage)
+   Pattern aligned with Branchline Travel Time (BltApp)
    ========================================================================== */
 const BauApp = (() => {
   function runCompare(datePrev, dateLatest, useCompareLoader) {
@@ -46,32 +47,35 @@ const BauApp = (() => {
     runCompare(d1, d2, true);
   }
 
-  function switchMainTab(tab) {
-    const dayPanel = document.getElementById('bauDayPanel');
-    const reportPanel = document.getElementById('bauReportPanel');
-    const btnDay = document.getElementById('tabBauDay');
-    const btnReport = document.getElementById('tabBauReport');
+  function showMainPanel(id) {
+    const map = {
+      day: 'bauMainDay',
+      report: 'bauMainReport'
+    };
+    document.querySelectorAll('.blt-main-panel').forEach(p => p.classList.add('hidden'));
+    document.querySelectorAll('.blt-main-tab').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-main') === id);
+    });
+    const el = document.getElementById(map[id] || 'bauMainDay');
+    if (el) el.classList.remove('hidden');
 
-    if (tab === 'report') {
-      if (dayPanel) dayPanel.classList.add('hidden');
-      if (reportPanel) reportPanel.classList.remove('hidden');
-      if (btnDay) { btnDay.classList.remove('active'); btnDay.setAttribute('aria-selected', 'false'); }
-      if (btnReport) { btnReport.classList.add('active'); btnReport.setAttribute('aria-selected', 'true'); }
+    if (id === 'report' && typeof BauSpRateReport !== 'undefined' && BauSpRateReport.render) {
       const sel = document.getElementById('selectLatest');
-      const focus = sel ? sel.value : null;
-      if (typeof BauSpRateReport !== 'undefined' && BauSpRateReport.render) {
-        BauSpRateReport.render(focus);
-      }
-    } else {
-      if (reportPanel) reportPanel.classList.add('hidden');
-      if (dayPanel) dayPanel.classList.remove('hidden');
-      if (btnReport) { btnReport.classList.remove('active'); btnReport.setAttribute('aria-selected', 'false'); }
-      if (btnDay) { btnDay.classList.add('active'); btnDay.setAttribute('aria-selected', 'true'); }
+      BauSpRateReport.render(sel ? sel.value : null);
     }
+  }
+
+  function initMainTabs() {
+    document.querySelectorAll('.blt-main-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        showMainPanel(btn.getAttribute('data-main') || 'day');
+      });
+    });
   }
 
   function init() {
     BauUIManager.initTabs();
+    initMainTabs();
     if (typeof BauSpRateReport !== 'undefined') BauSpRateReport.init();
 
     BauFileProcessor.init((d1, d2) => {
@@ -80,14 +84,9 @@ const BauApp = (() => {
 
     const btn = document.getElementById('btnCompare');
     if (btn) btn.addEventListener('click', triggerCompare);
-
-    const btnDay = document.getElementById('tabBauDay');
-    const btnReport = document.getElementById('tabBauReport');
-    if (btnDay) btnDay.addEventListener('click', () => switchMainTab('day'));
-    if (btnReport) btnReport.addEventListener('click', () => switchMainTab('report'));
   }
 
-  return { init, runCompare, switchMainTab };
+  return { init, runCompare, showMainPanel };
 })();
 
 document.addEventListener('DOMContentLoaded', BauApp.init);
