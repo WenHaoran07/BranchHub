@@ -34,7 +34,7 @@ const BdrChartManager = (() => {
         type: 'bar',
         data: {
           labels: top.map(r => r.dc.length > 22 ? r.dc.slice(0, 20) + '…' : r.dc),
-          datasets: [{ data: top.map(r => r.late), backgroundColor: 'rgba(230,0,18,0.75)', borderRadius: 5 }]
+          datasets: [{ data: top.map(r => r.late), backgroundColor: 'rgb(182, 9, 24)', borderRadius: 5 }]
         },
         options: barOpts('Late trips')
       });
@@ -45,7 +45,7 @@ const BdrChartManager = (() => {
         type: 'bar',
         data: {
           labels: top.map(r => r.sp.length > 22 ? r.sp.slice(0, 20) + '…' : r.sp),
-          datasets: [{ data: top.map(r => r.late), backgroundColor: 'rgba(183,28,28,0.7)', borderRadius: 5 }]
+          datasets: [{ data: top.map(r => r.late), backgroundColor: 'rgb(182, 9, 24)', borderRadius: 5 }]
         },
         options: barOpts('Late trips')
       });
@@ -56,7 +56,7 @@ const BdrChartManager = (() => {
         type: 'bar',
         data: {
           labels: top.map(r => r.route.length > 28 ? r.route.slice(0, 26) + '…' : r.route),
-          datasets: [{ data: top.map(r => r.late), backgroundColor: 'rgba(198,40,40,0.7)', borderRadius: 5 }]
+          datasets: [{ data: top.map(r => r.late), backgroundColor: 'rgb(182, 9, 24)', borderRadius: 5 }]
         },
         options: barOpts('Late trips')
       });
