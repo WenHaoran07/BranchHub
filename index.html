@@ -717,7 +717,7 @@
     function unlock() {
       document.body.classList.remove("locked");
       if (gate) gate.classList.add("hidden");
-      try { sessionStorage.setItem(STORAGE_KEY, "1"); } catch (e) {}
+      /* session unlock disabled — password required every visit */
       try { if (input) input.blur(); } catch (e) {}
     }
 
@@ -738,9 +738,8 @@
       }
     }
 
-    try {
-      if (sessionStorage.getItem(STORAGE_KEY) === "1") unlock();
-    } catch (e) {}
+    // Always ask for password on every load / refresh (no session unlock memory)
+
 
     btn.addEventListener("click", tryLogin);
     input.addEventListener("keydown", function (e) {
