@@ -2441,3 +2441,53 @@ body.mr-expand-open { overflow: hidden; }
 }
 .sp-rate-table tbody tr:hover { background: #FFF3E0; }
 .sp-rate-table tbody tr.sp-row-neg-weekly:hover { background: #FFCDD2 !important; }
+
+/* Top Contributors detailed tables */
+.tc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 900px) {
+  .tc-grid { grid-template-columns: 1fr; }
+}
+.tc-block {
+  background: #FAFAFA;
+  border: 1px solid #E0E0E0;
+  border-radius: 10px;
+  padding: 10px 12px 12px;
+}
+.tc-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #37474F;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #ECEFF1;
+}
+.tc-title.tc-own {
+  background: #E3F2FD;
+  color: #1565C0;
+}
+.tc-title.tc-sp {
+  background: #FFEBEE;
+  color: #C62828;
+}
+.tc-block .table-scroll {
+  max-height: 280px;
+  border-radius: 6px;
+  border: 1px solid #E0E0E0;
+}
+.tc-block .sp-rate-table {
+  min-width: 100%;
+  width: 100%;
+}
+.tc-block .sp-rate-table th {
+  font-size: 0.68rem;
+  padding: 6px 7px;
+}
+.tc-block .sp-rate-table td {
+  font-size: 0.78rem;
+  padding: 5px 7px;
+}
