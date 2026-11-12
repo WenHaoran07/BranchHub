@@ -262,19 +262,50 @@
 
       <!-- ========== APP USAGE REPORT ========== -->
       <div id="bauMainReport" class="blt-main-panel hidden">
-        <div class="card">
-          <h2><span class="icon">📊</span> Service Partners App Used Rates Report</h2>
-          <p class="section-note">
-            Daily rates for the selected week, weekly rate vs prior week, and monthly accumulated rates.
-            Rows with <strong style="color:#E60012">negative weekly difference</strong> are highlighted and sorted to the top.
-          </p>
+        <div class="card" style="margin-bottom:10px;">
+          <h2><span class="icon">📊</span> App Usage Report</h2>
           <div class="bau-report-toolbar">
             <div>
-              <label class="pe-label" for="bauReportWeekFilter">Week filter</label>
-              <select id="bauReportWeekFilter"></select>
+              <label class="pe-label" for="bauReportModeFilter">Mode</label>
+              <select id="bauReportModeFilter" style="min-width:120px;">
+                <option value="week">Week</option>
+                <option value="daily">Daily</option>
+              </select>
+            </div>
+            <div id="bauReportWeekWrap" style="display:flex;flex-wrap:wrap;gap:16px 24px;align-items:flex-end;">
+              <div>
+                <label class="pe-label" for="bauReportWeekFilter">Week</label>
+                <select id="bauReportWeekFilter"></select>
+              </div>
+              <div>
+                <label class="pe-label" for="bauReportCompareWeekFilter">Compare to</label>
+                <select id="bauReportCompareWeekFilter"></select>
+              </div>
+            </div>
+            <div id="bauReportDailyWrap" style="display:none;flex-wrap:wrap;gap:16px 24px;align-items:flex-end;">
+              <div>
+                <label class="pe-label" for="bauReportDailyFilter">Date</label>
+                <select id="bauReportDailyFilter" style="min-width:150px;"></select>
+              </div>
+              <div>
+                <label class="pe-label" for="bauReportCompareDailyFilter">Compare to</label>
+                <select id="bauReportCompareDailyFilter" style="min-width:150px;"></select>
+              </div>
             </div>
             <div class="bau-report-toolbar-hint" id="bauReportWeekHint"></div>
           </div>
+
+          <div class="bau-report-subtabs" style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px;">
+            <button type="button" class="bau-report-subtab tab active" data-sub="sp">🤝 Service Partners</button>
+            <button type="button" class="bau-report-subtab tab" data-sub="dc">📍 DC / Branchline Rates</button>
+            <button type="button" class="bau-report-subtab tab" data-sub="line">📦 Bulk vs Collection</button>
+            <button type="button" class="bau-report-subtab tab" data-sub="top">⚠ Top Contributors</button>
+          </div>
+        </div>
+
+        <!-- SP Rates -->
+        <div id="bauReportSp" class="bau-report-subpanel card">
+          <h2><span class="icon">🤝</span> Service Partners App Used Rates</h2>
           <p class="section-note" id="spRateReportNote"></p>
           <div class="table-scroll sp-rate-table-wrap">
             <table class="sp-rate-table" id="tableSpRateReport">
@@ -282,6 +313,37 @@
               <tbody id="tbodySpRateReport"></tbody>
             </table>
           </div>
+        </div>
+
+        <!-- DC / Branchline Rates (Sheet A) -->
+        <div id="bauReportDc" class="bau-report-subpanel card hidden">
+          <h2><span class="icon">📍</span> Branchline / DC App Used Rates</h2>
+          <p class="section-note" id="dcRateReportNote"></p>
+          <div class="table-scroll sp-rate-table-wrap">
+            <table class="sp-rate-table" id="tableDcRateReport">
+              <thead id="theadDcRateReport"></thead>
+              <tbody id="tbodyDcRateReport"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Bulk vs Collection (Sheet B) -->
+        <div id="bauReportLineType" class="bau-report-subpanel card hidden">
+          <h2><span class="icon">📦</span> DC Bulk Cargo vs Collection</h2>
+          <p class="section-note" id="dcLineTypeReportNote"></p>
+          <div class="table-scroll sp-rate-table-wrap">
+            <table class="sp-rate-table" id="tableDcLineTypeReport">
+              <thead id="theadDcLineTypeReport"></thead>
+              <tbody id="tbodyDcLineTypeReport"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Top Contributors -->
+        <div id="bauReportTop" class="bau-report-subpanel card hidden">
+          <h2><span class="icon">⚠</span> Top Contributors to Non-Compliance</h2>
+          <p class="section-note" id="topContributorsNote"></p>
+          <div id="bauTopContributorsPanel"></div>
         </div>
       </div><!-- /bauMainReport -->
     </div>
@@ -293,6 +355,7 @@
   <script src="bauChartManager.js"></script>
   <script src="bauUIManager.js"></script>
   <script src="bauSpRateReport.js"></script>
+  <script src="bauDcRateReport.js"></script>
   <script src="bauApp.js"></script>
 </body>
 </html>
