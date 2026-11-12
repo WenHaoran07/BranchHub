@@ -34,7 +34,7 @@ const BauChartManager = (() => {
         type: 'bar',
         data: {
           labels: top.map(r => r.dc.length > 22 ? r.dc.slice(0, 20) + '…' : r.dc),
-          datasets: [{ data: top.map(r => r.miss), backgroundColor: 'rgba(230,0,18,0.75)', borderRadius: 5 }]
+          datasets: [{ data: top.map(r => r.miss), backgroundColor: 'rgb(179, 5, 19)', borderRadius: 5 }]
         },
         options: barOpts('Non-compliant trips')
       });
@@ -45,7 +45,7 @@ const BauChartManager = (() => {
         type: 'bar',
         data: {
           labels: top.map(r => r.sp.length > 22 ? r.sp.slice(0, 20) + '…' : r.sp),
-          datasets: [{ data: top.map(r => r.miss), backgroundColor: 'rgba(183,28,28,0.7)', borderRadius: 5 }]
+          datasets: [{ data: top.map(r => r.miss), backgroundColor: 'rgb(179, 5, 19)', borderRadius: 5 }]
         },
         options: barOpts('Non-compliant trips')
       });
@@ -59,7 +59,7 @@ const BauChartManager = (() => {
             const name = r.driver || '(blank)';
             return name.length > 22 ? name.slice(0, 20) + '…' : name;
           }),
-          datasets: [{ data: top.map(r => r.miss), backgroundColor: 'rgba(198,40,40,0.7)', borderRadius: 5 }]
+          datasets: [{ data: top.map(r => r.miss), backgroundColor: 'rgb(179, 5, 19)', borderRadius: 5 }]
         },
         options: barOpts('Non-compliant trips')
       });
