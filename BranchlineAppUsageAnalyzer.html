@@ -19,7 +19,7 @@
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;">
-        <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.2);color:#fff;text-decoration:none;font-weight:600;font-size:0.88rem;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.35);white-space:nowrap;">← Back to Hub</a>
+        <a href="index.html" class="hub-link">← Back to Hub</a>
       </div>
     </div>
   </div>
@@ -29,7 +29,7 @@
       <img src="upload-file.gif" alt="Upload File" class="upload-gif"
            onerror="this.outerHTML='<div class=&quot;upload-icon&quot;>📂</div>';">
       <p><strong>Click to upload</strong> or drag & drop Excel file</p>
-      <p>Supports .xlsx with DATA sheet</p>
+      <p>Supports .xlsx with DATA sheet (CLOCK IN / CLOCK OUT REMARKS)</p>
       <input type="file" id="fileInput" accept=".xlsx,.xls">
     </div>
 
@@ -45,233 +45,228 @@
     </div>
 
     <div id="results" class="hidden">
-      <div class="bau-main-tabs" role="tablist" aria-label="App Usage views">
-        <button type="button" class="bau-main-tab active" id="tabBauDay" role="tab" aria-selected="true">
-          <span class="bau-tab-icon">📅</span>
-          <span class="bau-tab-label">App Usage Comparison</span>
-        </button>
-        <button type="button" class="bau-main-tab" id="tabBauReport" role="tab" aria-selected="false">
-          <span class="bau-tab-icon">📊</span>
-          <span class="bau-tab-label">App Usage Report</span>
-        </button>
+      <div class="blt-main-tabs">
+        <button type="button" class="blt-main-tab active" data-main="day">📅 Day Comparison</button>
+        <button type="button" class="blt-main-tab" data-main="report">📊 App Usage Report</button>
       </div>
 
-      <div id="bauDayPanel">
-      <!-- Comparison -->
-      <div class="card">
-        <h2><span class="icon">📱</span> SLU Branchline App Usage Comparison</h2>
-        <div class="date-selectors" id="dateSelectors">
-          <div>
-            <label>Previous / Baseline</label>
-            <select id="selectPrev"></select>
+      <!-- ========== DAY COMPARISON ========== -->
+      <div id="bauMainDay" class="blt-main-panel">
+        <div class="card">
+          <h2><span class="icon">📱</span> SLU Branchline App Usage Comparison</h2>
+          <div class="date-selectors" id="dateSelectors">
+            <div>
+              <label>Previous / Baseline</label>
+              <select id="selectPrev"></select>
+            </div>
+            <div>
+              <label>Latest / Focus</label>
+              <select id="selectLatest"></select>
+            </div>
+            <button id="btnCompare">Compare</button>
           </div>
-          <div>
-            <label>Latest / Focus</label>
-            <select id="selectLatest"></select>
+          <div class="date-info">
+            Comparing <span class="badge" id="datePrev"></span> vs <span class="badge" id="dateLatest"></span>
+            <span class="target-badge" id="targetBadgeText">Target 99%</span>
           </div>
-          <button id="btnCompare">Compare</button>
-        </div>
-        <div class="date-info">
-          Comparing <span class="badge" id="datePrev"></span> vs <span class="badge" id="dateLatest"></span>
-          <span class="target-badge" id="targetBadgeText">Target 99%</span>
-        </div>
-        <div class="metrics" id="metricsOverall"></div>
-        <div class="summary-box" id="summaryText"></div>
-      </div>
-
-      <!-- Non-compliant panels -->
-      <div class="card">
-        <h2><span class="icon">⚠</span> Non-Compliant DC &amp; Service Partners</h2>
-        <p class="section-note">Trips missing Clock-In (Arrival) and/or Clock-Out (Departure) — based on <strong>DC INTENDED</strong></p>
-        <div id="lateDcPanel"></div>
-        <div id="lateSpPanel" style="margin-top:16px;"></div>
-      </div>
-
-      <!-- Bulk / Collection / Own / TP -->
-      <div class="split-row">
-        <div class="card">
-          <h2><span class="icon">📦</span> Bulk Cargo</h2>
-          <div class="metrics" id="metricsBulk"></div>
-        </div>
-        <div class="card">
-          <h2><span class="icon">📥</span> Collection</h2>
-          <div class="metrics" id="metricsCollection"></div>
-        </div>
-      </div>
-      <div class="split-row">
-        <div class="card">
-          <h2><span class="icon">🏢</span> Own Fleet</h2>
-          <div class="metrics" id="metricsOwn"></div>
-        </div>
-        <div class="card">
-          <h2><span class="icon">🤝</span> Third-Party SP</h2>
-          <div class="metrics" id="metricsTP"></div>
-        </div>
-      </div>
-
-      <!-- Charts -->
-      <div class="charts-row">
-        <div class="card">
-          <h2><span class="icon">📍</span> Non-Compliant by DC</h2>
-          <p class="section-note">Grouped by DC INTENDED</p>
-          <div class="chart-wrap"><canvas id="chartDC"></canvas></div>
-        </div>
-        <div class="card">
-          <h2><span class="icon">🤝</span> Non-Compliant by Service Partner</h2>
-          <p class="section-note">SP with missing clock-in/out</p>
-          <div class="chart-wrap"><canvas id="chartSP"></canvas></div>
-        </div>
-      </div>
-      <div class="charts-row">
-        <div class="card">
-          <h2><span class="icon">👤</span> Top Drivers (Non-Compliant)</h2>
-          <p class="section-note">Drivers with the most missing app usage</p>
-          <div class="chart-wrap"><canvas id="chartDriver"></canvas></div>
-        </div>
-        <div class="card">
-          <h2><span class="icon">📉</span> Daily App Usage Trend</h2>
-          <p class="section-note">Compliant rate (both Clock-In &amp; Out YES) over days</p>
-          <div class="chart-wrap history-chart-wrap"><canvas id="chartHistory"></canvas></div>
-        </div>
-      </div>
-
-      <!-- Tables with tabs -->
-      <div class="card">
-        <h2><span class="icon">📋</span> Detail Tables</h2>
-        <div class="tabs">
-          <div class="tab active" data-tab="tabDC">Daily Comparison per DC Intended</div>
-          <div class="tab" data-tab="tabSP">SP Performance</div>
-          <div class="tab" data-tab="tabDriver">Driver Performance</div>
-          <div class="tab" data-tab="tabRoutes">Routes</div>
-          <div class="tab" data-tab="tabCarrier">Carrier Type</div>
-          <div class="tab" data-tab="tabMiss">Non-Compliant Detail</div>
+          <div class="metrics" id="metricsOverall"></div>
+          <div class="summary-box" id="summaryText"></div>
         </div>
 
-        <div id="tabDC" class="tab-panel active">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>DC Intended</th>
-                  <th>Total</th>
-                  <th>Compliant</th>
-                  <th>Miss</th>
-                  <th>NO CIn/ NO COut</th>
-                  <th>Rate</th>
-                  <th>Prev Rate</th>
-                  <th>Difference</th>
-                </tr>
-              </thead>
-              <tbody id="tbodyDC"></tbody>
-            </table>
+        <div class="card">
+          <h2><span class="icon">⚠</span> Non-Compliant DC &amp; Service Partners</h2>
+          <p class="section-note">(Current day) trips missing Clock-In and/or Clock-Out — based on <strong>DC INTENDED</strong></p>
+          <div id="lateDcPanel"></div>
+          <div id="lateSpPanel" style="margin-top:16px;"></div>
+        </div>
+
+        <div class="split-row">
+          <div class="card">
+            <h2><span class="icon">📦</span> Bulk Cargo</h2>
+            <div class="metrics" id="metricsBulk"></div>
+          </div>
+          <div class="card">
+            <h2><span class="icon">📥</span> Collection</h2>
+            <div class="metrics" id="metricsCollection"></div>
+          </div>
+        </div>
+        <div class="split-row">
+          <div class="card">
+            <h2><span class="icon">🏢</span> Own Fleet</h2>
+            <div class="metrics" id="metricsOwn"></div>
+          </div>
+          <div class="card">
+            <h2><span class="icon">🤝</span> Third-Party SP</h2>
+            <div class="metrics" id="metricsTP"></div>
           </div>
         </div>
 
-        <div id="tabSP" class="tab-panel">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Service Partner</th>
-                  <th>Total</th>
-                  <th>Compliant</th>
-                  <th>Miss</th>
-                  <th>NO CIn/ NO COut</th>
-                  <th>Rate</th>
-                  <th>Prev Rate</th>
-                  <th>Difference</th>
-                </tr>
-              </thead>
-              <tbody id="tbodySP"></tbody>
-            </table>
+        <div class="charts-row">
+          <div class="card">
+            <h2><span class="icon">📍</span> Non-Compliant by DC</h2>
+            <p class="section-note">Grouped by DC INTENDED</p>
+            <div class="chart-wrap"><canvas id="chartDC"></canvas></div>
+          </div>
+          <div class="card">
+            <h2><span class="icon">🤝</span> Non-Compliant by Service Partner</h2>
+            <p class="section-note">SP with missing clock-in/out</p>
+            <div class="chart-wrap"><canvas id="chartSP"></canvas></div>
+          </div>
+        </div>
+        <div class="charts-row">
+          <div class="card">
+            <h2><span class="icon">👤</span> Top Drivers (Non-Compliant)</h2>
+            <p class="section-note">Drivers with the most missing app usage</p>
+            <div class="chart-wrap"><canvas id="chartDriver"></canvas></div>
+          </div>
+          <div class="card">
+            <h2><span class="icon">📉</span> Daily App Usage Trend</h2>
+            <p class="section-note">Compliant rate (both Clock-In &amp; Out YES) over recent days</p>
+            <div class="chart-wrap history-chart-wrap"><canvas id="chartHistory"></canvas></div>
           </div>
         </div>
 
-        <div id="tabDriver" class="tab-panel">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Driver</th>
-                  <th>Total</th>
-                  <th>Miss</th>
-                  <th>NO CIn/ NO COut</th>
-                  <th>Rate</th>
-                  <th>Prev Rate</th>
-                  <th>Difference</th>
-                </tr>
-              </thead>
-              <tbody id="tbodyDriver"></tbody>
-            </table>
+        <div class="card">
+          <h2><span class="icon">📋</span> Detail Tables</h2>
+          <div class="tabs">
+            <div class="tab active" data-tab="tabDC">Daily Comparison per DC</div>
+            <div class="tab" data-tab="tabSP">SP Performance</div>
+            <div class="tab" data-tab="tabDriver">Driver Performance</div>
+            <div class="tab" data-tab="tabRoutes">Routes</div>
+            <div class="tab" data-tab="tabCarrier">Carrier Type</div>
+            <div class="tab" data-tab="tabMiss">Non-Compliant Detail</div>
+          </div>
+
+          <div id="tabDC" class="tab-panel active">
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>DC Intended</th>
+                    <th>Total</th>
+                    <th>Compliant</th>
+                    <th>Miss</th>
+                    <th>No Clock-In / No Clock-Out</th>
+                    <th>Rate</th>
+                    <th>Prev Rate</th>
+                    <th>Difference</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyDC"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="tabSP" class="tab-panel">
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Service Partner</th>
+                    <th>Total</th>
+                    <th>Compliant</th>
+                    <th>Miss</th>
+                    <th>No Clock-In / No Clock-Out</th>
+                    <th>Rate</th>
+                    <th>Prev Rate</th>
+                    <th>Difference</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodySP"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="tabDriver" class="tab-panel">
+            <p class="section-note">Driver performance · current day vs previous</p>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Driver</th>
+                    <th>Total</th>
+                    <th>Miss</th>
+                    <th>No Clock-In / No Clock-Out</th>
+                    <th>Rate</th>
+                    <th>Prev Rate</th>
+                    <th>Difference</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyDriver"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="tabRoutes" class="tab-panel">
+            <p class="section-note">Routes · current day vs previous</p>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Route</th>
+                    <th>Total</th>
+                    <th>Miss</th>
+                    <th>Rate</th>
+                    <th>Prev Rate</th>
+                    <th>Difference</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyRoutes"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="tabCarrier" class="tab-panel">
+            <p class="section-note">Carrier type · current day vs previous</p>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Carrier</th>
+                    <th>Total</th>
+                    <th>Miss</th>
+                    <th>Rate</th>
+                    <th>Prev Rate</th>
+                    <th>Difference</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyCarrier"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="tabMiss" class="tab-panel">
+            <p class="section-note">Trips missing Clock-In and/or Clock-Out (up to 200 rows)</p>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Shipment</th>
+                    <th>Driver</th>
+                    <th>Plate</th>
+                    <th>SP</th>
+                    <th>DC</th>
+                    <th>Route</th>
+                    <th>Clock In</th>
+                    <th>Clock Out</th>
+                    <th>Issue</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyMissDetail"></tbody>
+              </table>
+            </div>
           </div>
         </div>
+      </div><!-- /bauMainDay -->
 
-        <div id="tabRoutes" class="tab-panel">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Route</th>
-                  <th>Total</th>
-                  <th>Miss</th>
-                  <th>Rate</th>
-                  <th>Prev Rate</th>
-                  <th>Difference</th>
-                </tr>
-              </thead>
-              <tbody id="tbodyRoutes"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div id="tabCarrier" class="tab-panel">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Carrier</th>
-                  <th>Total</th>
-                  <th>Miss</th>
-                  <th>Rate</th>
-                  <th>Prev Rate</th>
-                  <th>Difference</th>
-                </tr>
-              </thead>
-              <tbody id="tbodyCarrier"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div id="tabMiss" class="tab-panel">
-          <p class="section-note">Trips missing Clock-In and/or Clock-Out (up to 200 rows)</p>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Shipment</th>
-                  <th>Driver</th>
-                  <th>Plate</th>
-                  <th>SP</th>
-                  <th>DC</th>
-                  <th>Route</th>
-                  <th>Clock In</th>
-                  <th>Clock Out</th>
-                  <th>Issue</th>
-                </tr>
-              </thead>
-              <tbody id="tbodyMissDetail"></tbody>
-            </table>
-          </div>
-        </div>
-
-      </div>
-      </div><!-- /bauDayPanel -->
-
-      <div id="bauReportPanel" class="hidden">
+      <!-- ========== APP USAGE REPORT ========== -->
+      <div id="bauMainReport" class="blt-main-panel hidden">
         <div class="card">
           <h2><span class="icon">📊</span> Service Partners App Used Rates Report</h2>
           <p class="section-note">
+            Daily rates for the selected week, weekly rate vs prior week, and monthly accumulated rates.
+            Rows with <strong style="color:#E60012">negative weekly difference</strong> are highlighted and sorted to the top.
           </p>
           <div class="bau-report-toolbar">
             <div>
@@ -281,14 +276,14 @@
             <div class="bau-report-toolbar-hint" id="bauReportWeekHint"></div>
           </div>
           <p class="section-note" id="spRateReportNote"></p>
-          <div class="table-wrap sp-rate-table-wrap">
+          <div class="table-scroll sp-rate-table-wrap">
             <table class="sp-rate-table" id="tableSpRateReport">
               <thead id="theadSpRateReport"></thead>
               <tbody id="tbodySpRateReport"></tbody>
             </table>
           </div>
         </div>
-      </div><!-- /bauReportPanel -->
+      </div><!-- /bauMainReport -->
     </div>
   </div>
 
@@ -297,7 +292,6 @@
   <script src="bauDataAnalyzer.js"></script>
   <script src="bauChartManager.js"></script>
   <script src="bauUIManager.js"></script>
-  <script src="bauDetailFilter.js"></script>
   <script src="bauSpRateReport.js"></script>
   <script src="bauApp.js"></script>
 </body>
