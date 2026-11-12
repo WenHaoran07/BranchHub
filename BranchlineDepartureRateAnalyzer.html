@@ -19,7 +19,7 @@
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;">
-        <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.2);color:#fff;text-decoration:none;font-weight:600;font-size:0.88rem;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.35);white-space:nowrap;">← Back to Hub</a>
+        <a href="index.html" class="hub-link" style="color:#fff;text-decoration:none;font-weight:600;">← Back to Hub</a>
       </div>
     </div>
   </div>
@@ -29,14 +29,14 @@
       <img src="upload-file.gif" alt="Upload File" class="upload-gif"
            onerror="this.outerHTML='<div class=&quot;upload-icon&quot;>📂</div>';">
       <p><strong>Click to upload</strong> or drag & drop Excel file</p>
-      <p>Supports .xlsx with DATA sheet</p>
+      <p>Supports .xlsx with DATA sheet (ON TIME YES/NO)</p>
       <input type="file" id="fileInput" accept=".xlsx,.xls">
     </div>
 
     <div id="loading" class="loading hidden">
       <img src="jnt-loading.gif" alt="Loading..." class="loading-gif"
            onerror="this.style.display='none';">
-      <div>Analyzing branchline departure rate data, please wait...</div>
+      <div>Analyzing branchline departure data, please wait...</div>
     </div>
     <div id="loadingCompare" class="loading hidden">
       <img src="loading.gif" alt="Comparing..." class="loading-gif"
@@ -45,253 +45,325 @@
     </div>
 
     <div id="results" class="hidden">
-      <!-- Comparison -->
-      <div class="card">
-        <h2><span class="icon">📊</span> SLU Branchline Departure Rate Comparison</h2>
-        <div class="date-selectors" id="dateSelectors">
-          <div>
-            <label>Previous / Baseline</label>
-            <select id="selectPrev"></select>
-          </div>
-          <div>
-            <label>Latest / Focus</label>
-            <select id="selectLatest"></select>
-          </div>
-          <button id="btnCompare">Compare</button>
-        </div>
-        <div class="date-info">
-          Comparing <span class="badge" id="datePrev"></span> vs <span class="badge" id="dateLatest"></span>
-          <span class="target-badge" id="targetBadgeText">Target 97%</span>
-        </div>
-        <div class="metrics" id="metricsOverall"></div>
-        <div class="summary-box" id="summaryText"></div>
+      <div class="blt-main-tabs" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;padding:6px;background:#fff;border:1px solid rgba(0,0,0,0.06);border-radius:14px;">
+        <button type="button" class="blt-main-tab active" data-main="day" style="padding:8px 14px;border-radius:10px;border:none;background:var(--jt-red);color:#fff;font-weight:650;cursor:pointer;">📅 Day Comparison</button>
+        <button type="button" class="blt-main-tab" data-main="report" style="padding:8px 14px;border-radius:10px;border:none;background:transparent;color:#6B7280;font-weight:650;cursor:pointer;">📊 Departure Rate Report</button>
       </div>
 
-      <!-- Late panels -->
-      <div class="card">
-        <h2><span class="icon">⚠</span> Late DC &amp; Service Partners</h2>
-        <p class="section-note">(Current Day) based on <strong>DC </strong> - entities with at least one late trip</p>
-        <div id="lateDcPanel"></div>
-        <div id="lateSpPanel" style="margin-top:16px;"></div>
-        <div id="noLatePanel" class="hidden"></div>
-      </div>
-
-      <!-- Bulk / Collection -->
-      <div class="split-row">
+      <!-- ========== DAY COMPARISON ========== -->
+      <div id="bdrMainDay" class="blt-main-panel">
         <div class="card">
-          <h2><span class="icon">📦</span> Bulk Cargo</h2>
-          <div class="metrics" id="metricsBulk"></div>
-        </div>
-        <div class="card">
-          <h2><span class="icon">📥</span> Collection</h2>
-          <div class="metrics" id="metricsCollection"></div>
-        </div>
-      </div>
-
-      <!-- Charts -->
-      <div class="charts-row">
-        <div class="card">
-          <h2><span class="icon">📍</span> Late by DC</h2>
-          <p class="section-note">Grouped by DC INTENDED</p>
-          <div class="chart-wrap"><canvas id="chartDC"></canvas></div>
-        </div>
-        <div class="card">
-          <h2><span class="icon">🤝</span> Late by Service Partner</h2>
-          <p class="section-note">SP / PH with late trips</p>
-          <div class="chart-wrap"><canvas id="chartSP"></canvas></div>
-        </div>
-      </div>
-      <div class="charts-row">
-        <div class="card">
-          <h2><span class="icon">🗺️</span> Top Late Routes</h2>
-          <p class="section-note">Routes with the most late trips</p>
-          <div class="chart-wrap"><canvas id="chartRoutes"></canvas></div>
-        </div>
-        <div class="card">
-          <h2><span class="icon">📉</span> Daily Achievement Trend</h2>
-          <p class="section-note">Branchline on-time rate over recent days</p>
-          <div class="chart-wrap history-chart-wrap"><canvas id="chartHistory"></canvas></div>
-        </div>
-      </div>
-
-      <!-- Tables with tabs -->
-      <div class="card">
-        <h2><span class="icon">📋</span> Detail Tables</h2>
-        <div class="tabs">
-          <div class="tab active" data-tab="tabDC">Daily Comparison per DC Intended</div>
-          <div class="tab" data-tab="tabSP">SP Performance</div>
-          <div class="tab" data-tab="tabSpLateRoutes">SP Late Routes</div>
-          <div class="tab" data-tab="tabRoutes">Routes</div>
-          <div class="tab" data-tab="tabLateDetail">Late Trip Detail</div>
-          <div class="tab" data-tab="tabHistory">Daily History</div>
-        </div>
-
-        <div id="tabDC" class="tab-panel active">
-          <p class="section-note">DC performance</p>
-          <div class="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>DC Name</th>
-                  <th>Total</th>
-                  <th>On Time</th>
-                  <th>Late</th>
-                  <th>Rate</th>
-                  <th>Prev Rate</th>
-                  <th>Rate Diff</th>
-                </tr>
-              </thead>
-              <tbody id="dcBody"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div id="tabSP" class="tab-panel">
-          <p class="section-note">Service Partner (PH/SP) performance · current day vs previous</p>
-          <div class="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Service Partner</th>
-                  <th>Total</th>
-                  <th>On Time</th>
-                  <th>Late</th>
-                  <th>Rate</th>
-                  <th>Prev Rate</th>
-                  <th>Rate Diff</th>
-                </tr>
-              </thead>
-              <tbody id="spBody"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div id="tabSpLateRoutes" class="tab-panel">
-          <p class="section-note">Top late departures by <strong>Service Partner</strong></p>
-          <div class="sp-delay-toolbar">
+          <h2><span class="icon">🚚</span> SLU Branchline Departure Rate Comparison</h2>
+          <div class="date-selectors" id="dateSelectors">
             <div>
-              <label class="pe-label" for="bdrLateModeFilter">Filter by</label>
-              <select id="bdrLateModeFilter">
-                <option value="date">Date</option>
-                <option value="week">Week</option>
-              </select>
-            </div>
-            <div id="bdrLateDateWrap">
-              <label class="pe-label" for="bdrLateDateFilter">Date</label>
-              <select id="bdrLateDateFilter">
-                <option value="ALL">Overall (All dates)</option>
-              </select>
-            </div>
-            <div id="bdrLateWeekWrap" style="display:none;">
-              <label class="pe-label" for="bdrLateWeekFilter">Week</label>
-              <select id="bdrLateWeekFilter"></select>
+              <label>Previous / Baseline</label>
+              <select id="selectPrev"></select>
             </div>
             <div>
-              <label class="pe-label" for="bdrLateSortFilter">Sort by</label>
-              <select id="bdrLateSortFilter">
-                <option value="totalDelay">Total delay</option>
-                <option value="lateTrips">Late trips</option>
-                <option value="avgDelay">Avg delay</option>
-              </select>
+              <label>Latest / Focus</label>
+              <select id="selectLatest"></select>
             </div>
-            <div class="sp-delay-sp-wrap">
-              <label class="pe-label">SP Name</label>
-              <div class="sp-ms-dropdown" id="bdrLateMs">
-                <button type="button" class="sp-ms-toggle" id="bdrLateMsToggle" aria-expanded="false">
-                  <span id="bdrLateMsLabel">All SPs</span>
-                  <span class="sp-ms-caret">▾</span>
-                </button>
-                <div class="sp-ms-panel hidden" id="bdrLateMsPanel">
-                  <div class="sp-ms-actions">
-                    <button type="button" id="bdrLateSpAll" class="sp-delay-mini-btn">Select all</button>
-                    <button type="button" id="bdrLateSpClear" class="sp-delay-mini-btn">Clear</button>
+            <button id="btnCompare">Compare</button>
+          </div>
+          <div class="date-info">
+            Comparing <span class="badge" id="datePrev"></span> vs <span class="badge" id="dateLatest"></span>
+            <span class="target-badge" id="targetBadgeText">Target 97%</span>
+          </div>
+          <div class="metrics" id="metricsOverall"></div>
+          <div class="summary-box" id="summaryText"></div>
+        </div>
+
+        <div class="card">
+          <h2><span class="icon">⚠</span> Late Departures by DC &amp; Service Partners</h2>
+          <div id="noLatePanel" class="hidden"></div>
+          <div id="lateDcPanel"></div>
+          <div id="lateSpPanel" style="margin-top:16px;"></div>
+        </div>
+
+        <div class="split-row">
+          <div class="card">
+            <h2><span class="icon">📦</span> Bulk Cargo</h2>
+            <div class="metrics" id="metricsBulk"></div>
+          </div>
+          <div class="card">
+            <h2><span class="icon">📥</span> Collection</h2>
+            <div class="metrics" id="metricsCollection"></div>
+          </div>
+        </div>
+
+        <div class="charts-row">
+          <div class="card">
+            <h2><span class="icon">📍</span> Late by DC</h2>
+            <div class="chart-wrap"><canvas id="chartDC"></canvas></div>
+          </div>
+          <div class="card">
+            <h2><span class="icon">🤝</span> Late by Service Partner</h2>
+            <div class="chart-wrap"><canvas id="chartSP"></canvas></div>
+          </div>
+        </div>
+        <div class="charts-row">
+          <div class="card">
+            <h2><span class="icon">🛣</span> Late by Route</h2>
+            <div class="chart-wrap"><canvas id="chartRoutes"></canvas></div>
+          </div>
+          <div class="card">
+            <h2><span class="icon">📉</span> Daily On-Time Trend</h2>
+            <div class="chart-wrap history-chart-wrap"><canvas id="chartHistory"></canvas></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2><span class="icon">📋</span> Detail Tables</h2>
+          <div class="tabs">
+            <div class="tab active" data-tab="tabDC">Per DC</div>
+            <div class="tab" data-tab="tabSP">SP Performance</div>
+            <div class="tab" data-tab="tabRoutes">Routes</div>
+            <div class="tab" data-tab="tabSpLate">SP Late Routes</div>
+            <div class="tab" data-tab="tabLate">Late Trip Detail</div>
+            <div class="tab" data-tab="tabHistory">Daily History</div>
+          </div>
+
+          <div id="tabDC" class="tab-panel active">
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>DC Intended</th>
+                    <th>Total</th>
+                    <th>On Time</th>
+                    <th>Late</th>
+                    <th>Rate</th>
+                    <th>Prev Rate</th>
+                    <th>Difference</th>
+                  </tr>
+                </thead>
+                <tbody id="dcBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="tabSP" class="tab-panel">
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Service Partner</th>
+                    <th>Total</th>
+                    <th>On Time</th>
+                    <th>Late</th>
+                    <th>Rate</th>
+                    <th>Prev Rate</th>
+                    <th>Difference</th>
+                  </tr>
+                </thead>
+                <tbody id="spBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="tabRoutes" class="tab-panel">
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Route</th>
+                    <th>Total</th>
+                    <th>On Time</th>
+                    <th>Late</th>
+                    <th>Rate</th>
+                    <th>Prev Rate</th>
+                    <th>Difference</th>
+                  </tr>
+                </thead>
+                <tbody id="routesBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="tabSpLate" class="tab-panel">
+            <div class="pe-toolbar" style="margin-bottom:10px;">
+              <div>
+                <label class="pe-label" for="bdrLateModeFilter">Mode</label>
+                <select id="bdrLateModeFilter">
+                  <option value="date">Date</option>
+                  <option value="week">Week</option>
+                </select>
+              </div>
+              <div id="bdrLateDateWrap">
+                <label class="pe-label" for="bdrLateDateFilter">Date</label>
+                <select id="bdrLateDateFilter"></select>
+              </div>
+              <div id="bdrLateWeekWrap" style="display:none;">
+                <label class="pe-label" for="bdrLateWeekFilter">Week</label>
+                <select id="bdrLateWeekFilter"></select>
+              </div>
+              <div>
+                <label class="pe-label" for="bdrLateSortFilter">Sort</label>
+                <select id="bdrLateSortFilter">
+                  <option value="totalDelay">Total delay</option>
+                  <option value="lateTrips">Late trips</option>
+                  <option value="avgDelay">Avg delay</option>
+                </select>
+              </div>
+              <div class="sp-delay-sp-wrap">
+                <label class="pe-label">SP filter</label>
+                <div class="sp-ms-dropdown">
+                  <button type="button" class="sp-ms-toggle" id="bdrLateMsToggle" aria-expanded="false">
+                    <span id="bdrLateMsLabel">All SPs</span>
+                    <span class="sp-ms-caret">▼</span>
+                  </button>
+                  <div class="sp-ms-panel hidden" id="bdrLateMsPanel">
+                    <div class="sp-ms-actions">
+                      <button type="button" class="sp-delay-mini-btn" id="bdrLateSpAll">All</button>
+                      <button type="button" class="sp-delay-mini-btn" id="bdrLateSpClear">Clear</button>
+                    </div>
+                    <div class="sp-ms-list" id="bdrLateSpList"></div>
                   </div>
-                  <div class="sp-ms-list" id="bdrLateSpList"></div>
                 </div>
               </div>
             </div>
+            <p class="section-note" id="bdrLateNote"></p>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>SP</th>
+                    <th>Route</th>
+                    <th>DC</th>
+                    <th>Late</th>
+                    <th>Total Delay</th>
+                    <th>Avg Delay</th>
+                  </tr>
+                </thead>
+                <tbody id="spLateRoutesBody"></tbody>
+              </table>
+            </div>
           </div>
-          <p class="section-note" id="bdrLateNote"></p>
-          <div class="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>SP Name</th>
-                  <th>Route (late)</th>
-                  <th>DC Intended</th>
-                  <th>Late trips</th>
-                  <th>Total delay</th>
-                  <th>Avg delay</th>
-                </tr>
-              </thead>
-              <tbody id="spLateRoutesBody"></tbody>
+
+          <div id="tabLate" class="tab-panel">
+            <p class="section-note" id="bdrLateDetailNote"></p>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Shipment</th>
+                    <th>Route</th>
+                    <th>DC</th>
+                    <th>SP</th>
+                    <th>Line Type</th>
+                    <th>Plate</th>
+                    <th>Scheduled Dep</th>
+                    <th>Dispatch</th>
+                    <th>Late</th>
+                  </tr>
+                </thead>
+                <tbody id="lateBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="tabHistory" class="tab-panel">
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>On Time</th>
+                    <th>Late</th>
+                    <th>Rate</th>
+                  </tr>
+                </thead>
+                <tbody id="historyBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div><!-- /bdrMainDay -->
+
+      <!-- ========== DEPARTURE RATE REPORT ========== -->
+      <div id="bdrMainReport" class="blt-main-panel hidden">
+        <div class="card" style="margin-bottom:10px;">
+          <h2><span class="icon">📊</span> Departure Rate Report</h2>
+          <div class="bau-report-toolbar" style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 24px;margin:12px 0 8px;padding:12px 14px;background:#FAFAFA;border:1px solid #EEE;border-radius:10px;">
+            <div>
+              <label class="pe-label" for="bdrReportModeFilter">Mode</label>
+              <select id="bdrReportModeFilter" style="min-width:120px;padding:8px 12px;border:1px solid #E0E0E0;border-radius:8px;">
+                <option value="week">Week</option>
+                <option value="daily">Daily</option>
+              </select>
+            </div>
+            <div id="bdrReportWeekWrap" style="display:flex;flex-wrap:wrap;gap:16px 24px;align-items:flex-end;">
+              <div>
+                <label class="pe-label" for="bdrReportWeekFilter">Week</label>
+                <select id="bdrReportWeekFilter" style="min-width:280px;padding:8px 12px;border:1px solid #E0E0E0;border-radius:8px;"></select>
+              </div>
+              <div>
+                <label class="pe-label" for="bdrReportCompareWeekFilter">Compare to</label>
+                <select id="bdrReportCompareWeekFilter" style="min-width:280px;padding:8px 12px;border:1px solid #E0E0E0;border-radius:8px;"></select>
+              </div>
+            </div>
+            <div id="bdrReportDailyWrap" style="display:none;flex-wrap:wrap;gap:16px 24px;align-items:flex-end;">
+              <div>
+                <label class="pe-label" for="bdrReportDailyFilter">Date</label>
+                <select id="bdrReportDailyFilter" style="min-width:150px;padding:8px 12px;border:1px solid #E0E0E0;border-radius:8px;"></select>
+              </div>
+              <div>
+                <label class="pe-label" for="bdrReportCompareDailyFilter">Compare to</label>
+                <select id="bdrReportCompareDailyFilter" style="min-width:150px;padding:8px 12px;border:1px solid #E0E0E0;border-radius:8px;"></select>
+              </div>
+            </div>
+            <div class="bau-report-toolbar-hint" id="bdrReportWeekHint" style="font-size:0.85rem;color:#757575;padding-bottom:6px;"></div>
+          </div>
+
+          <div class="bdr-report-subtabs" style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px;">
+            <button type="button" class="bdr-report-subtab tab active" data-sub="sp">🤝 Service Partners</button>
+            <button type="button" class="bdr-report-subtab tab" data-sub="dc">📍 DC Rates (Sheet A)</button>
+            <button type="button" class="bdr-report-subtab tab" data-sub="line">📦 Bulk vs Collection (Sheet B)</button>
+            <button type="button" class="bdr-report-subtab tab" data-sub="late">⚠ Late Departures</button>
+          </div>
+        </div>
+
+        <div id="bdrReportSp" class="bdr-report-subpanel card">
+          <h2><span class="icon">🤝</span> Service Partners On-Time Rates</h2>
+          <p class="section-note" id="spRateReportNote"></p>
+          <div class="table-scroll sp-rate-table-wrap">
+            <table class="sp-rate-table" id="tableSpRateReport">
+              <thead id="theadSpRateReport"></thead>
+              <tbody id="tbodySpRateReport"></tbody>
             </table>
           </div>
         </div>
 
-        <div id="tabRoutes" class="tab-panel">
-          <p class="section-note">All routes · current day vs previous</p>
-          <div class="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Route</th>
-                  <th>Total</th>
-                  <th>On Time</th>
-                  <th>Late</th>
-                  <th>Rate</th>
-                  <th>Prev Rate</th>
-                  <th>Rate Diff</th>
-                </tr>
-              </thead>
-              <tbody id="routesBody"></tbody>
+        <div id="bdrReportDc" class="bdr-report-subpanel card hidden">
+          <h2><span class="icon">📍</span> Branchline / DC On-Time Rates</h2>
+          <p class="section-note" id="dcRateReportNote"></p>
+          <div class="table-scroll sp-rate-table-wrap">
+            <table class="sp-rate-table" id="tableDcRateReport">
+              <thead id="theadDcRateReport"></thead>
+              <tbody id="tbodyDcRateReport"></tbody>
             </table>
           </div>
         </div>
 
-        <div id="tabLateDetail" class="tab-panel">
-          <p class="section-note">Late departures</p>
-          <p class="section-note" id="bdrLateDetailNote"></p>
-          <div class="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Shipment / Code</th>
-                  <th>Route</th>
-                  <th>Dep DC</th>
-                  <th>SP</th>
-                  <th>Line Type</th>
-                  <th>Plate</th>
-                  <th>Scheduled Dep</th>
-                  <th>Actual Dispatch</th>
-                  <th>Late Time</th>
-                </tr>
-              </thead>
-              <tbody id="lateBody"></tbody>
+        <div id="bdrReportLineType" class="bdr-report-subpanel card hidden">
+          <h2><span class="icon">📦</span> DC Bulk Cargo vs Collection</h2>
+          <p class="section-note" id="dcLineTypeReportNote"></p>
+          <div class="table-scroll sp-rate-table-wrap">
+            <table class="sp-rate-table" id="tableDcLineTypeReport">
+              <thead id="theadDcLineTypeReport"></thead>
+              <tbody id="tbodyDcLineTypeReport"></tbody>
             </table>
           </div>
         </div>
 
-        <div id="tabHistory" class="tab-panel">
-          <p class="section-note">Daily SLU Branchline Departure Rate (most recent first)</p>
-          <div class="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Total</th>
-                  <th>On Time</th>
-                  <th>Late</th>
-                  <th>Rate</th>
-                </tr>
-              </thead>
-              <tbody id="historyBody"></tbody>
-            </table>
-          </div>
+        <div id="bdrReportLate" class="bdr-report-subpanel card hidden">
+          <h2><span class="icon">⚠</span> Late Departures</h2>
+          <p class="section-note" id="lateDeptNote"></p>
+          <div id="bdrLateDeptPanel"></div>
         </div>
-
-      </div>
+      </div><!-- /bdrMainReport -->
     </div>
   </div>
 
@@ -301,6 +373,7 @@
   <script src="bdrChartManager.js"></script>
   <script src="bdrUIManager.js"></script>
   <script src="bdrLateFilter.js"></script>
+  <script src="bdrRateReport.js"></script>
   <script src="bdrApp.js"></script>
 </body>
 </html>
