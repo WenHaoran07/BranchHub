@@ -27,6 +27,9 @@ const BdrApp = (() => {
         if (typeof BdrLateFilter !== 'undefined') {
           BdrLateFilter.render(dateLatest || 'ALL');
         }
+        if (typeof BdrRateReport !== 'undefined' && BdrRateReport.render) {
+          BdrRateReport.render(dateLatest);
+        }
       } catch (err) {
         console.error(err);
         alert('Error during comparison: ' + err.message);
@@ -37,8 +40,8 @@ const BdrApp = (() => {
   }
 
   function triggerCompare() {
-    const d1 = document.getElementById('selectPrev').value;
-    const d2 = document.getElementById('selectLatest').value;
+    const d1 = document.getElementById('selectPrev') && document.getElementById('selectPrev').value;
+    const d2 = document.getElementById('selectLatest') && document.getElementById('selectLatest').value;
     if (!d1 || !d2) {
       alert('Please select both dates.');
       return;
@@ -46,9 +49,41 @@ const BdrApp = (() => {
     runCompare(d1, d2, true);
   }
 
+  function showMainPanel(id) {
+    const map = {
+      day: 'bdrMainDay',
+      report: 'bdrMainReport'
+    };
+    document.querySelectorAll('.blt-main-panel').forEach(p => p.classList.add('hidden'));
+    document.querySelectorAll('.blt-main-tab').forEach(b => {
+      const active = b.getAttribute('data-main') === id;
+      b.classList.toggle('active', active);
+      b.style.background = active ? 'var(--jt-red)' : 'transparent';
+      b.style.color = active ? '#fff' : '#6B7280';
+    });
+    const el = document.getElementById(map[id] || 'bdrMainDay');
+    if (el) el.classList.remove('hidden');
+
+    if (id === 'report' && typeof BdrRateReport !== 'undefined' && BdrRateReport.render) {
+      const sel = document.getElementById('selectLatest');
+      BdrRateReport.render(sel ? sel.value : null);
+    }
+  }
+
+  function initMainTabs() {
+    document.querySelectorAll('.blt-main-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        showMainPanel(btn.getAttribute('data-main') || 'day');
+      });
+    });
+  }
+
   function init() {
     BdrUIManager.initTabs();
+    initMainTabs();
     if (typeof BdrLateFilter !== 'undefined') BdrLateFilter.init();
+    if (typeof BdrRateReport !== 'undefined') BdrRateReport.init();
+
     BdrFileProcessor.init((d1, d2) => {
       runCompare(d1, d2, false);
     });
@@ -57,7 +92,7 @@ const BdrApp = (() => {
     if (btn) btn.addEventListener('click', triggerCompare);
   }
 
-  return { init, runCompare };
+  return { init, runCompare, showMainPanel };
 })();
 
 document.addEventListener('DOMContentLoaded', BdrApp.init);
