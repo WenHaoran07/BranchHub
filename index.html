@@ -717,7 +717,7 @@
     function unlock() {
       document.body.classList.remove("locked");
       if (gate) gate.classList.add("hidden");
-      /* session unlock disabled — password required every visit */
+      try { sessionStorage.setItem(STORAGE_KEY, "1"); } catch (e) {}
       try { if (input) input.blur(); } catch (e) {}
     }
 
@@ -738,7 +738,44 @@
       }
     }
 
-    // Always ask for password on every load / refresh (no session unlock memory)
+    // Password rules:
+    // - Refresh (F5/reload) → ask again
+    // - Arrived via Main Hub switch button (from= / tx=) → ask again
+    // - Back to Hub from an analyzer → keep unlocked
+    function shouldForceLogin() {
+      try {
+        var nav = performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
+        if (nav && nav.type === "reload") return true;
+      } catch (e) {}
+      try {
+        var p = new URLSearchParams(window.location.search);
+        if (p.get("tx") === "1") return true;
+        if (p.get("from") === "branchhub" || p.get("from") === "mainhub") return true;
+      } catch (e) {}
+      return false;
+    }
+
+    function cleanSwitchParams() {
+      try {
+        var p = new URLSearchParams(window.location.search);
+        if (!p.get("tx") && !p.get("from")) return;
+        p.delete("tx");
+        p.delete("from");
+        var q = p.toString();
+        var url = window.location.pathname + (q ? "?" + q : "") + window.location.hash;
+        window.history.replaceState(null, "", url);
+      } catch (e) {}
+    }
+
+    if (shouldForceLogin()) {
+      try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      cleanSwitchParams();
+    } else {
+      try {
+        if (sessionStorage.getItem(STORAGE_KEY) === "1") unlock();
+      } catch (e) {}
+    }
+
 
 
     btn.addEventListener("click", tryLogin);
