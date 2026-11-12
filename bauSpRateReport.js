@@ -173,25 +173,48 @@ const BauSpRateReport = (() => {
     }
   }
 
+  function resolvePeriodLocal() {
+    // Prefer shared filter from BauDcRateReport (supports free week/daily compare)
+    if (typeof BauDcRateReport !== 'undefined' && BauDcRateReport.getResolvedPeriod) {
+      return BauDcRateReport.getResolvedPeriod();
+    }
+    const dates = getDates();
+    const weeks = availableWeeks.length ? availableWeeks : listWeeksFromDates(dates);
+    const weekId = selectedWeekId() || (weeks[0] && weeks[0].id);
+    const weekIdx = weeks.findIndex(w => w.id === weekId);
+    const weekCurr = weekIdx >= 0 ? weeks[weekIdx] : weeks[0];
+    const weekPrev = weekIdx >= 0 && weekIdx < weeks.length - 1 ? weeks[weekIdx + 1] : null;
+    const dailyDates = weekCurr
+      ? dates.filter(d => d >= weekCurr.startKey && d <= weekCurr.endKey)
+      : [];
+    return {
+      mode: 'week',
+      focusDay: dailyDates.length ? dailyDates[dailyDates.length - 1] : null,
+      dailyDates,
+      weekCurr,
+      weekPrev,
+      focusMonth: weekCurr ? weekCurr.endKey.slice(0, 7) : null,
+      currStart: weekCurr ? weekCurr.startKey : null,
+      currEnd: weekCurr ? weekCurr.endKey : null,
+      prevStart: weekPrev ? weekPrev.startKey : null,
+      prevEnd: weekPrev ? weekPrev.endKey : null,
+      compareDay: null
+    };
+  }
+
   function buildReport() {
     const all = getAllRows();
     const dates = getDates();
     if (!all.length || !dates.length) return null;
 
-    const weeks = availableWeeks.length ? availableWeeks : listWeeksFromDates(dates);
-    if (!weeks.length) return null;
+    const p = resolvePeriodLocal();
+    if (!p.currStart && !p.focusDay) return null;
 
-    const weekId = selectedWeekId() || weeks[0].id;
-    const weekIdx = weeks.findIndex(w => w.id === weekId);
-    const weekCurr = weekIdx >= 0 ? weeks[weekIdx] : weeks[0];
-    const weekPrev = weekIdx >= 0 && weekIdx < weeks.length - 1 ? weeks[weekIdx + 1] : null;
-
-    // Daily trend = dates inside selected week (chronological)
-    const dailyDates = dates.filter(d => d >= weekCurr.startKey && d <= weekCurr.endKey);
-
-    // Month of selected week end
-    const focusMonth = weekCurr.endKey.slice(0, 7);
-    const monthRows = all.filter(r => r.dateKey && r.dateKey.startsWith(focusMonth));
+    const dailyDates = p.dailyDates || [];
+    const focusMonth = p.focusMonth;
+    const monthRows = focusMonth
+      ? all.filter(r => r.dateKey && r.dateKey.startsWith(focusMonth))
+      : [];
 
     const dcBySp = primaryDcBySp(all);
     const sps = [...new Set(all.map(r => r.sp || '(blank)'))].sort((a, b) => a.localeCompare(b));
@@ -205,19 +228,25 @@ const BauSpRateReport = (() => {
       });
 
       let dailyGap = null;
-      const lastIdx = dailyRates.length - 1;
-      if (lastIdx >= 1 && dailyRates[lastIdx] != null && dailyRates[lastIdx - 1] != null) {
-        dailyGap = dailyRates[lastIdx] - dailyRates[lastIdx - 1];
+      if (p.mode === 'daily' && p.focusDay && p.compareDay) {
+        const a = rateFor(spAll.filter(r => r.dateKey === p.focusDay));
+        const b = rateFor(spAll.filter(r => r.dateKey === p.compareDay));
+        if (a != null && b != null) dailyGap = a - b;
+      } else {
+        const lastIdx = dailyRates.length - 1;
+        if (lastIdx >= 1 && dailyRates[lastIdx] != null && dailyRates[lastIdx - 1] != null) {
+          dailyGap = dailyRates[lastIdx] - dailyRates[lastIdx - 1];
+        }
       }
 
       let weekPrevRate = null;
       let weekCurrRate = null;
-      if (weekPrev) {
-        const wr = spAll.filter(r => r.dateKey >= weekPrev.startKey && r.dateKey <= weekPrev.endKey);
+      if (p.prevStart && p.prevEnd) {
+        const wr = spAll.filter(r => r.dateKey >= p.prevStart && r.dateKey <= p.prevEnd);
         if (wr.length) weekPrevRate = rateFor(wr);
       }
-      if (weekCurr) {
-        const wr = spAll.filter(r => r.dateKey >= weekCurr.startKey && r.dateKey <= weekCurr.endKey);
+      if (p.currStart && p.currEnd) {
+        const wr = spAll.filter(r => r.dateKey >= p.currStart && r.dateKey <= p.currEnd);
         if (wr.length) weekCurrRate = rateFor(wr);
       }
       const weeklyDiff = (weekCurrRate != null && weekPrevRate != null)
@@ -255,9 +284,10 @@ const BauSpRateReport = (() => {
     });
 
     return {
+      period: p,
       dailyDates,
-      weekPrev,
-      weekCurr,
+      weekPrev: p.weekPrev,
+      weekCurr: p.weekCurr,
       focusMonth,
       rows,
       negCount: rows.filter(r => r.negWeekly).length
@@ -278,13 +308,21 @@ const BauSpRateReport = (() => {
       return;
     }
 
-    const { dailyDates, weekPrev, weekCurr, focusMonth, rows, negCount } = report;
+    const { period, dailyDates, weekPrev, weekCurr, focusMonth, rows, negCount } = report;
+    const p = period || {};
 
     const dailyHeaders = dailyDates.map(d =>
       '<th class="sp-th-daily">' + escapeHtml(shortDateLabel(d)) + '</th>'
     ).join('');
-    const wPrevLabel = weekPrev ? ('WEEK ' + weekPrev.weekNo) : 'WEEK −1';
-    const wCurrLabel = weekCurr ? ('WEEK ' + weekCurr.weekNo) : 'WEEK';
+    let wPrevLabel = 'COMPARE';
+    let wCurrLabel = 'CURRENT';
+    if (p.mode === 'daily') {
+      wPrevLabel = p.compareDay ? shortDateLabel(p.compareDay) : 'COMPARE';
+      wCurrLabel = p.focusDay ? shortDateLabel(p.focusDay) : 'CURRENT';
+    } else {
+      wPrevLabel = weekPrev ? ('WEEK ' + weekPrev.weekNo) : 'COMPARE';
+      wCurrLabel = weekCurr ? ('WEEK ' + weekCurr.weekNo) : 'CURRENT';
+    }
     const monthLabel = focusMonth || '';
     const dailyColSpan = Math.max(dailyDates.length, 1);
 
@@ -292,10 +330,10 @@ const BauSpRateReport = (() => {
       '<tr class="sp-rate-group-row">' +
         '<th rowspan="2" class="sp-th-sp">SP</th>' +
         '<th rowspan="2" class="sp-th-dc">DC INTENDED</th>' +
-        '<th colspan="' + dailyColSpan + '" class="sp-th-group-daily">DAILY TREND (selected week)</th>' +
-        '<th rowspan="2" class="sp-th-gap">DAILY GAP</th>' +
-        '<th colspan="3" class="sp-th-group-week">WEEKLY RATE</th>' +
-        '<th colspan="5" class="sp-th-group-month">MONTHLY ACCUMULATED RATE' +
+        '<th colspan="' + dailyColSpan + '" class="sp-th-group-daily">DAILY TREND</th>' +
+        '<th rowspan="2" class="sp-th-gap">GAP</th>' +
+        '<th colspan="3" class="sp-th-group-week">RATE COMPARE</th>' +
+        '<th colspan="5" class="sp-th-group-month">MONTHLY' +
           (monthLabel ? ' · ' + escapeHtml(monthLabel) : '') + '</th>' +
       '</tr>' +
       '<tr class="sp-rate-subhead">' +
@@ -304,11 +342,11 @@ const BauSpRateReport = (() => {
           : '<th class="sp-th-daily">—</th>') +
         '<th class="sp-th-week">' + escapeHtml(wPrevLabel) + '</th>' +
         '<th class="sp-th-week">' + escapeHtml(wCurrLabel) + '</th>' +
-        '<th class="sp-th-week">WEEKLY DIFFERENCE</th>' +
-        '<th class="sp-th-month">NO DEPARTURE</th>' +
-        '<th class="sp-th-month">NO ARRIVAL</th>' +
-        '<th class="sp-th-month">TOTAL APP USED</th>' +
-        '<th class="sp-th-month">GRAND TOTAL</th>' +
+        '<th class="sp-th-week">DIFF</th>' +
+        '<th class="sp-th-month">NO DEP</th>' +
+        '<th class="sp-th-month">NO ARR</th>' +
+        '<th class="sp-th-month">APP USED</th>' +
+        '<th class="sp-th-month">TOTAL</th>' +
         '<th class="sp-th-month">RATE %</th>' +
       '</tr>';
 
@@ -357,47 +395,48 @@ const BauSpRateReport = (() => {
     }).join('');
 
     if (note) {
-      const wTxt = (weekPrev && weekCurr)
-        ? ('Week ' + weekCurr.weekNo + ' vs Week ' + weekPrev.weekNo)
-        : (weekCurr ? ('Week ' + weekCurr.weekNo) : 'selected week');
-      note.innerHTML = rows.length + ' service partner(s) · ' + escapeHtml(wTxt) +
-        ' · daily ' + dailyDates.length + ' day(s) in week' +
-        (negCount
-          ? ' · <strong style="color:#E60012">' + negCount + ' with negative weekly difference</strong>'
-          : ' · no negative weekly differences');
+      let wTxt = '';
+      if (p.mode === 'daily') {
+        wTxt = (p.focusDay || '') + (p.compareDay ? ' vs ' + p.compareDay : '');
+      } else {
+        wTxt = (weekPrev && weekCurr)
+          ? ('WK' + weekCurr.weekNo + ' vs WK' + weekPrev.weekNo)
+          : (weekCurr ? ('WK' + weekCurr.weekNo) : '');
+      }
+      note.textContent = rows.length + ' SP · ' + wTxt +
+        (negCount ? ' · ' + negCount + ' negative diff' : '');
     }
   }
 
   function render(preferDate) {
-    populateWeekFilter(preferDate);
+    // Shared filters are owned by BauDcRateReport; only populate if that module is absent
+    if (typeof BauDcRateReport === 'undefined') {
+      populateWeekFilter(preferDate);
+    } else {
+      const dates = getDates();
+      availableWeeks = listWeeksFromDates(dates);
+    }
     drawTable();
   }
 
-  function onWeekChange() {
-    const sel = document.getElementById('bauReportWeekFilter');
-    const hint = document.getElementById('bauReportWeekHint');
-    const pick = sel ? sel.value : null;
-    const idx = availableWeeks.findIndex(w => w.id === pick);
-    const curr = idx >= 0 ? availableWeeks[idx] : null;
-    const prev = idx >= 0 && idx < availableWeeks.length - 1 ? availableWeeks[idx + 1] : null;
-    if (hint) {
-      if (curr && prev) {
-        hint.textContent = 'Comparing WK' + curr.weekNo + ' vs WK' + prev.weekNo ;
-      } else if (curr) {
-        hint.textContent = 'WK' + curr.weekNo + ' · no prior week in data';
-      } else {
-        hint.textContent = '';
-      }
-    }
+  function onExternalFilterChange() {
+    const dates = getDates();
+    availableWeeks = listWeeksFromDates(dates);
     drawTable();
   }
 
   function init() {
     if (bound) return;
     bound = true;
-    const sel = document.getElementById('bauReportWeekFilter');
-    if (sel) sel.addEventListener('change', onWeekChange);
+    // Filter change handlers are owned by BauDcRateReport when present
+    if (typeof BauDcRateReport === 'undefined') {
+      const sel = document.getElementById('bauReportWeekFilter');
+      if (sel) sel.addEventListener('change', () => {
+        populateWeekFilter();
+        drawTable();
+      });
+    }
   }
 
-  return { init, render };
+  return { init, render, drawTable, onExternalFilterChange };
 })();
